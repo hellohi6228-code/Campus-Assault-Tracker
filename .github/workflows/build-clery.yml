@@ -7,7 +7,7 @@ on:
     paths: [scripts/build_clery.py, .github/workflows/build-clery.yml]
 permissions:
   contents: write
-concurrency: { group: data-commit, cancel-in-progress: false }
+concurrency: { group: clery-data, cancel-in-progress: false }
 jobs:
   build:
     runs-on: ubuntu-latest
