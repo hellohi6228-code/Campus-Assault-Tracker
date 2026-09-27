@@ -48,6 +48,21 @@ FAMOUS_SHORT = {"Cornell", "Yale", "Stanford", "Harvard", "Duke", "Baylor", "Van
                 "Northwestern", "Georgetown", "Brown", "Clemson", "Purdue", "Rutgers", "Tulane", "Emory", "Syracuse"}
 
 
+_OWNERS = {}
+
+
+def head_owner(head):
+    """The institution that gets a shared system name like "Ohio State University" or "Indiana University": the one
+    with the most reports, so branch campuses (Ohio State-Newark, IU-Indianapolis) don't collect main-campus news."""
+    if not _OWNERS:
+        for n, aliases in ALIASES.items():   # a press alias ("Indiana University" for Bloomington) decides first
+            for a in aliases:
+                _OWNERS.setdefault(a, n)
+        for n in load_institutions():
+            _OWNERS.setdefault(n.partition("-")[0].strip(), n)
+    return _OWNERS.get(head)
+
+
 def search_names(inst):
     """Names the press uses for a school, most specific first. Headlines must contain one of them."""
     head, _, tail = inst.partition("-")
@@ -57,11 +72,11 @@ def search_names(inst):
         names += ["UC " + tail, "University of California, " + tail]
     elif head == "California State University" and tail:
         names += ["Cal State " + tail, "CSU " + tail]
-    elif tail and re.search(r"campus$", tail, re.I):
+    elif tail and re.search(r"campus$", tail, re.I) and head_owner(head) == inst:
         names.append(head)                                   # "Ohio State University-Main Campus"
     elif tail:
-        names.append(head + " " + tail)                      # "University of Michigan Ann Arbor"
-        if len(head.split()) > 1:
+        names.append(head + " " + re.sub(r"\s*campus$", "", tail, flags=re.I))  # "University of Michigan Ann Arbor"
+        if len(head.split()) > 1 and head_owner(head) == inst:
             names.append(head)                               # "University of Michigan" (not "Lake" from "Lake-Sumter")
     else:
         names.append(inst)
