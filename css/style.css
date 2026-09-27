@@ -166,3 +166,7 @@ table.yrs { border-collapse: collapse; font-size: .88rem; margin: 4px 0; }
 .th-sub { font-weight: 400; font-size: .68rem; }
 .fed-top { margin: 6px 0 2px; }
 .fed-top b { font-size: 1.3rem; color: var(--accent); }
+:root { --t-news: #6b3fa0; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --t-news: #c3a0f0; } }
+:root[data-theme="dark"] { --t-news: #c3a0f0; }
+.t-news { background: var(--t-news); }
