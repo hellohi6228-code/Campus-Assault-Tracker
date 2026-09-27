@@ -124,3 +124,8 @@ table.yrs { border-collapse: collapse; font-size: .88rem; margin: 4px 0; }
 @media (max-width: 600px) { .chip { white-space: normal; } .rank.cases .case-title { min-width: 0; } }
 .mobile-only { display: none; }
 @media (max-width: 600px) { .mobile-only { display: block; margin-top: 4px; } }
+
+.big { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin: 0 0 16px; }
+.big div { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; }
+.big b { display: block; font-size: 1.6rem; font-variant-numeric: tabular-nums; color: var(--accent); line-height: 1.2; }
+.big span { color: var(--muted); font-size: .82rem; }
