@@ -1,12 +1,14 @@
 """Find freely licensed photos of people named in data/cases.js (people convicted in court) and write
 data/photos.js: window.PHOTOS = {name: {"src", "page", "credit", "license"}}.
 
-Only images whose license allows reuse (public domain, CC0, CC BY, CC BY-SA) are kept, so the site can
-display them with attribution. Non-free images (e.g. Wikipedia "fair use" uploads, news photos) are skipped.
+Sources, in order: government-released photos listed in data/official-photos.json (public records, copied into
+data/photos/), then any freely licensed image (public domain, CC0, CC BY, CC BY-SA) on Wikimedia Commons or in
+the person's Wikipedia articles whose file name names them. News-agency photos are never copied.
 Run: python scripts/fetch_photos.py   (needs network access to wikipedia.org and wikimedia.org)
 """
 import html
 import json
+import os
 import re
 import subprocess
 import sys
@@ -50,6 +52,36 @@ def image_info(filename):
     return None
 
 
+def article_images(title):
+    d = api("en.wikipedia.org", action="query", prop="images", imlimit="50", titles=title, redirects=1)
+    pages = d.get("query", {}).get("pages", [])
+    return [i["title"].split(":", 1)[1] for i in (pages[0].get("images", []) if pages else [])]
+
+
+def commons_search(name):
+    d = api("commons.wikimedia.org", action="query", list="search", srsearch=f'"{name}"', srnamespace="6", srlimit="30")
+    return [r["title"].split(":", 1)[1] for r in d.get("query", {}).get("search", [])]
+
+
+def names_person(filename, name):
+    """A file is used only if its name contains the person's first and last name, so a building, logo or
+    someone else with the same surname is never shown."""
+    parts = re.sub(r"\s+(Jr\.?|Sr\.?|I+V?)$", "", name).split()
+    fn = re.sub(r"[_\-.]", " ", filename).lower()
+    return parts[0].lower() in fn and parts[-1].lower() in fn
+
+
+def download_official(name, entry):
+    """Government-released photos (booking photos, prison/registry photos) listed in data/official-photos.json
+    are public records; they are copied into data/photos/ so the site doesn't depend on the agency's site."""
+    os.makedirs("data/photos", exist_ok=True)
+    ext = os.path.splitext(urllib.parse.urlparse(entry["url"]).path)[1].lower() or ".jpg"
+    path = "data/photos/" + re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-") + ext
+    with urllib.request.urlopen(urllib.request.Request(entry["url"], headers=UA), timeout=60) as r:
+        open(path, "wb").write(r.read())
+    return {"src": path, "page": entry.get("page", entry["url"]), "credit": entry["credit"], "license": "Public record"}
+
+
 def main():
     out = subprocess.run(["node", "-e", 'global.window={};require("./data/cases.js");process.stdout.write(JSON.stringify(window.CASES))'],
                          capture_output=True, text=True, check=True).stdout
@@ -58,35 +90,47 @@ def main():
         for n in c.get("named", []):
             if re.search(r"convict|guilty", n.get("basis", ""), re.I) and n["name"] not in names:
                 names.append(n["name"])
+    official = json.load(open("data/official-photos.json")) if os.path.exists("data/official-photos.json") else {}
     photos = {}
     for name in names:
-        found = None
+        if name in official:
+            try:
+                photos[name] = download_official(name, official[name])
+                print(f"{name}: official photo from {official[name]['url']}", file=sys.stderr)
+                continue
+            except Exception as e:  # noqa: BLE001 - fall back to the Commons search
+                print(f"{name}: official photo download failed: {e}", file=sys.stderr)
+        candidates = []
         for title in [name] + EXTRA_TITLES.get(name, []):
             try:
-                f = lead_image(title)
-                info = image_info(f) if f else None
+                candidates += [lead_image(title)] + article_images(title)
             except Exception as e:  # noqa: BLE001 - one failed lookup shouldn't stop the rest
-                print(f"{name}: lookup failed for {title}: {e}", file=sys.stderr)
-                continue
-            # The lead image of an article about a case can be a building or logo; keep it only if the file
-            # name contains the person's surname.
-            surname = re.sub(r"\s+(Jr\.?|Sr\.?|I+V?)$", "", name).split()[-1].lower()
-            if info and surname not in (f or "").lower():
-                print(f"{name}: {title} -> {f} skipped (file name doesn't name the person)", file=sys.stderr)
+                print(f"{name}: article lookup failed for {title}: {e}", file=sys.stderr)
+        try:
+            candidates += commons_search(name)
+        except Exception as e:  # noqa: BLE001
+            print(f"{name}: Commons search failed: {e}", file=sys.stderr)
+        found = None
+        for f in dict.fromkeys(c for c in candidates if c and names_person(c, name)):
+            try:
+                info = image_info(f)
+            except Exception as e:  # noqa: BLE001
+                print(f"{name}: {f}: {e}", file=sys.stderr)
                 continue
             if info:
-                print(f"{name}: {title} -> {f} [{info['license']}] free={info['free']}", file=sys.stderr)
+                print(f"{name}: {f} [{info['license']}] free={info['free']}", file=sys.stderr)
                 if info["free"]:
                     found = {k: info[k] for k in ("src", "page", "credit", "license")}
+                    found["src"] = found["src"].split("?")[0]
                     break
         if found:
             photos[name] = found
         else:
-            print(f"{name}: no freely licensed photo", file=sys.stderr)
+            print(f"{name}: no usable photo found", file=sys.stderr)
     with open("data/photos.js", "w") as fh:
-        fh.write("// Generated by scripts/fetch_photos.py - freely licensed photos of people convicted in court.\n")
+        fh.write("// Generated by scripts/fetch_photos.py - photos of people convicted in court.\n")
         fh.write("window.PHOTOS = " + json.dumps(photos, ensure_ascii=False, indent=1, sort_keys=True) + ";\n")
-    print(f"{len(photos)} of {len(names)} convicted individuals have a freely licensed photo", file=sys.stderr)
+    print(f"{len(photos)} of {len(names)} convicted individuals have a photo", file=sys.stderr)
 
 
 if __name__ == "__main__":
