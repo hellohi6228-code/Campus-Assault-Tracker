@@ -73,21 +73,35 @@ def parse_psu(text):
     return entries
 
 
+def load(page, url, marker="INCIDENT #"):
+    """Open a log page and wait until entries (or an empty result) have rendered; retry twice."""
+    for attempt in range(3):
+        try:
+            page.goto(url, wait_until="domcontentloaded", timeout=45000)
+            try:
+                page.wait_for_function(f"document.body.innerText.includes({json.dumps(marker)})", timeout=20000)
+            except Exception:  # noqa: BLE001 - an empty page has no marker; read what is there
+                pass
+            return page.inner_text("body")
+        except Exception as e:  # noqa: BLE001
+            print(f"  retry {attempt + 1} {url}: {e.__class__.__name__}", file=sys.stderr)
+            time.sleep(5)
+    return ""
+
+
 def fetch_psu(page):
-    by_school = {}
+    """Yield (institution, entries) for each Penn State campus."""
     for value, inst in PSU_CAMPUSES.items():
-        seen_ids = set()
+        seen_ids, entries = set(), []
         for n in range(0, 40):
-            page.goto(f"https://www.police.psu.edu/daily-crime-log?title={value}&page={n}", wait_until="networkidle", timeout=60000)
-            page.wait_for_timeout(1500)
-            entries = parse_psu(page.inner_text("body"))
-            new = [e for e in entries if e["id"] not in seen_ids]
+            text = load(page, f"https://www.police.psu.edu/daily-crime-log?title={value}&page={n}")
+            new = [e for e in parse_psu(text) if e["id"] not in seen_ids]
             if not new:
                 break
             seen_ids.update(e["id"] for e in new)
-            by_school.setdefault(inst, []).extend(new)
+            entries.extend(new)
         print(f"PSU {inst}: {len(seen_ids)} log entries read", file=sys.stderr)
-    return by_school
+        yield inst, entries
 
 
 ADAPTERS = [("Penn State", fetch_psu)]
@@ -124,23 +138,22 @@ def main():
         page = browser.new_page(user_agent=UA)
         for name, fn in ADAPTERS:
             try:
-                results = fn(page)
+                for inst, entries in fn(page):
+                    added, total = merge(inst, entries)
+                    ok += 1 if entries else 0
+                    print(f"{inst}: +{added} new sex-offense entries, {total} stored", file=sys.stderr)
             except Exception as e:  # noqa: BLE001 - one broken adapter must not stop the others
                 print(f"{name}: adapter failed: {e}", file=sys.stderr)
-                continue
-            ok += 1
-            for inst, entries in results.items():
-                added, total = merge(inst, entries)
-                print(f"{inst}: +{added} new sex-offense entries, {total} stored", file=sys.stderr)
         browser.close()
     # Index of schools with stored entries, so the site knows which files exist.
+    os.makedirs(OUT, exist_ok=True)
     index = {}
     for f in os.listdir(OUT) if os.path.isdir(OUT) else []:
         if f.endswith(".json") and f != "index.json":
             index[f[:-5]] = len(json.load(open(os.path.join(OUT, f))))
     json.dump(index, open(os.path.join(OUT, "index.json"), "w"), sort_keys=True)
     if not ok:
-        sys.exit("all adapters failed")
+        sys.exit("no log entries could be read from any school")
 
 
 if __name__ == "__main__":
