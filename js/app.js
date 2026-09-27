@@ -157,7 +157,8 @@
     // Convicted people link to the official U.S. Department of Justice sex offender registry (photos are published there).
     var named = (k.named || []).map(function (p) {
       return "<b>" + esc(p.name) + "</b> — " + esc(p.basis) +
-        ' · <a href="https://www.nsopw.gov/search-public-sex-offender-registries" target="_blank" rel="noopener">Look up in the national sex offender registry ↗</a>';
+        (p.photo ? ' · <a href="' + esc(p.photo) + '" target="_blank" rel="noopener">Photo &amp; coverage ↗</a>' : "") +
+        ' · <a href="https://www.nsopw.gov/search-public-sex-offender-registries" target="_blank" rel="noopener">Sex offender registry ↗</a>';
     }).join("<br>");
     return '<details class="item"><summary>' + badge(t ? TRACK_CLASS[t.track] : "t-fed", statusWord(t)) +
       ' <span class="it-title">' + esc(k.title) + '</span> <span class="muted small">' + esc(k.year) + "</span></summary>" +
