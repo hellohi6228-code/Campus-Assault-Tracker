@@ -8,6 +8,7 @@ Counting method: Clery geography "total" = on-campus + noncampus + public proper
 counts are a subset of on-campus and are not added). Sex offenses = rape + fondling + incest +
 statutory rape, as defined in the Clery Act.
 """
+import datetime
 import io
 import json
 import re
@@ -22,6 +23,8 @@ API = "https://ope.ed.gov/campussafety/api/dataFiles/file?fileName="
 # Each release covers three calendar years. "Rape"/"fondling" categories exist from 2014 on (earlier years
 # used "forcible sex offenses" and are not comparable), so 2014-2024 is the full comparable history.
 RELEASES = ["Crime2016EXCEL.zip", "Crime2019EXCEL.zip", "Crime2022EXCEL.zip", "Crime2025EXCEL.zip"]
+# Newer releases (one per year, each covering the three prior calendar years) are picked up automatically.
+NEWER = ["Crime%dEXCEL.zip" % y for y in range(2026, datetime.date.today().year + 2)]
 GEOS = ["oncampuscrime", "noncampuscrime", "publicpropertycrime"]
 OFFENSES = ["RAPE", "FONDL", "INCES", "STATR"]
 IPEDS_DIRS = ["HD2024", "HD2023", "HD2022"]
@@ -66,32 +69,48 @@ def main():
     years = set()
     col_re = re.compile(r"^(%s)(\d\d)$" % "|".join(OFFENSES))
 
-    for rel in RELEASES:
+    releases = []
+    for rel in RELEASES + NEWER:
         print("downloading", rel, file=sys.stderr)
-        zf = zipfile.ZipFile(io.BytesIO(fetch(API + rel)))
+        try:
+            releases.append((rel, zipfile.ZipFile(io.BytesIO(fetch(API + rel)))))
+        except Exception as e:  # noqa: BLE001 - a future release that isn't published yet
+            if rel in RELEASES:
+                raise
+            print(rel, "not published yet:", e, file=sys.stderr)
+    used = []
+    for rel, zf in reversed(releases):   # newest first: a year's figures come from the latest release covering it
+        rel_counts = defaultdict(lambda: defaultdict(lambda: [0, 0, 0, 0]))
         rel_years = set()
         for geo in GEOS:
             df = read_table(zf, geo)
             df.columns = [str(c).strip() for c in df.columns]
             for r in df.to_dict("records"):
                 uid = int(r["UNITID_P"])
-                campuses[uid] = {
-                    "name": str(r["INSTNM"]).strip(),
-                    "branch": str(r.get("BRANCH") or "").strip(),
-                    "city": str(r.get("City") or "").strip().title(),
-                    "state": str(r.get("State") or "").strip(),
-                    "enroll": int(r["Total"]) if pd.notna(r.get("Total")) else 0,
-                }
+                if uid not in campuses:   # newest release's name, city and enrollment
+                    campuses[uid] = {
+                        "name": str(r["INSTNM"]).strip(),
+                        "branch": str(r.get("BRANCH") or "").strip(),
+                        "city": str(r.get("City") or "").strip().title(),
+                        "state": str(r.get("State") or "").strip(),
+                        "enroll": int(r["Total"]) if pd.notna(r.get("Total")) else 0,
+                    }
                 for col, val in r.items():
                     m = col_re.match(col)
                     if not m or pd.isna(val):
                         continue
                     yr = 2000 + int(m.group(2))
                     rel_years.add(yr)
-                    counts[uid][yr][OFFENSES.index(m.group(1))] += int(val)
-        # A later release supersedes earlier ones for overlapping years (none overlap today).
-        years |= rel_years
-        print(rel, "years", sorted(rel_years), file=sys.stderr)
+                    rel_counts[uid][yr][OFFENSES.index(m.group(1))] += int(val)
+        new_years = rel_years - years
+        for uid, per in rel_counts.items():
+            for yr, v in per.items():
+                if yr in new_years:
+                    counts[uid][yr] = v
+        years |= new_years
+        if new_years:
+            used.append(rel)
+        print(rel, "years", sorted(rel_years), "used for", sorted(new_years), file=sys.stderr)
 
     years = sorted(years)
     coords = load_coords()
@@ -142,7 +161,7 @@ def main():
 
     out_campuses.sort(key=lambda c: -sum(sum(v) for v in c[7]))
     data = {
-        "source": "U.S. Department of Education, Campus Safety and Security Survey (Clery Act), releases " + ", ".join(RELEASES),
+        "source": "U.S. Department of Education, Campus Safety and Security Survey (Clery Act), releases " + ", ".join(sorted(used)),
         "sourceUrl": "https://ope.ed.gov/campussafety/",
         "years": years,
         "recentYears": recent,
