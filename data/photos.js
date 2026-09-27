@@ -29,5 +29,11 @@ window.PHOTOS = {
   "license": "Public domain",
   "page": "https://commons.wikimedia.org/wiki/File:Roy_Charles_Waller.jpg",
   "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0b/Roy_Charles_Waller.jpg/250px-Roy_Charles_Waller.jpg"
+ },
+ "Scott Shaw": {
+  "credit": "Joe Crawford",
+  "license": "CC BY 2.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Scott_Shaw,_2014_San_Diego_Comic_Con.jpg",
+  "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b8/Scott_Shaw%2C_2014_San_Diego_Comic_Con.jpg/250px-Scott_Shaw%2C_2014_San_Diego_Comic_Con.jpg"
  }
 };
