@@ -1,0 +1,25 @@
+name: probe-crimelog
+on:
+  push:
+    branches: [claude/campus-rape-cases-database-eqvpw9]
+    paths: [.github/workflows/probe-crimelog.yml]
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          curl -sSL -A "Mozilla/5.0" "https://www.police.psu.edu/daily-crime-log" -o p.html; wc -c p.html
+          python3 - <<'PY'
+          import re
+          h=open('p.html',encoding='utf-8',errors='replace').read()
+          i=h.find('<table'); print('table at',i)
+          print(re.sub(r'\s+',' ',h[i:i+6000]) if i>=0 else re.sub(r'\s+',' ',h[h.find('<main'):h.find('<main')+6000]))
+          print('----- forms/selects')
+          for m in re.finditer(r'<select[^>]*name="([^"]+)"[^>]*>(.*?)</select>', h, re.S):
+              print(m.group(1), re.findall(r'<option[^>]*value="([^"]*)"[^>]*>([^<]*)', m.group(2))[:40])
+          print('----- pager', re.findall(r'href="([^"]*page=\d+[^"]*)"', h)[:10])
+          print('----- sexual rows', len(re.findall(r'(?i)(rape|sexual|fondl|indecent)', h)))
+          PY
+          curl -sSL -A "Mozilla/5.0" -o /dev/null -w 'uo %{http_code}\n' https://clery.uoregon.edu/reports/crime-log
+          curl -sSL -A "Mozilla/5.0" -o /dev/null -w 'msu %{http_code}\n' https://dpps.msu.edu/services/clery-log
+          curl -sSL -A "Mozilla/5.0" -o /dev/null -w 'ut %{http_code}\n' https://police.utexas.edu/reports/daily-crime-log
