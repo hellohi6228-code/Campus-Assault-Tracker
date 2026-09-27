@@ -30,6 +30,6 @@ jobs:
           git pull --rebase
           git stash pop
           python scripts/build_search_index.py
-          git add data/school-news data/search-index.json
+          git add data/school-news data/search-index.json data/new-finds.json
           git commit -m "Update school news archive"
           git push

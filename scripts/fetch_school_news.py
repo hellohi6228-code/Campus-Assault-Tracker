@@ -60,7 +60,9 @@ def search_names(inst):
     elif tail and re.search(r"campus$", tail, re.I):
         names.append(head)                                   # "Ohio State University-Main Campus"
     elif tail:
-        names += [head + " " + tail, head]                   # "University of Michigan Ann Arbor", "University of Michigan"
+        names.append(head + " " + tail)                      # "University of Michigan Ann Arbor"
+        if len(head.split()) > 1:
+            names.append(head)                               # "University of Michigan" (not "Lake" from "Lake-Sumter")
     else:
         names.append(inst)
     base = names[-1] if tail and head not in ("University of California", "California State University") else names[0]
@@ -68,8 +70,8 @@ def search_names(inst):
     if m:
         names.append(m.group(1))                             # "Ohio State University" -> "Ohio State"
     m = re.match(r"^(\w+) (?:University|College)$", base)
-    if m and m.group(1) in FAMOUS_SHORT:
-        names.append(m.group(1))                             # "Cornell University" -> "Cornell"
+    if m and m.group(1) in FAMOUS_SHORT and base != m.group(1) + " College" or base == "Dartmouth College":
+        names.append(m.group(1))                             # "Cornell University" -> "Cornell" (not "Cornell College")
     names += ALIASES.get(inst, [])
     return list(dict.fromkeys(names))
 
@@ -147,7 +149,9 @@ def main():
         path = os.path.join(OUT, slug(inst) + ".json")
         if os.path.exists(path):
             known = {re.sub(r"[^a-z0-9]", "", x["t"].lower())[:80] for x in items}
-            items += [x for x in flatten(json.load(open(path))) if re.sub(r"[^a-z0-9]", "", x["t"].lower())[:80] not in known]
+            # Older stories are re-checked against the school's names, so earlier false matches drop out.
+            items += [x for x in flatten(json.load(open(path)))
+                      if re.sub(r"[^a-z0-9]", "", x["t"].lower())[:80] not in known and name_re.search(x["t"])]
         items.sort(key=lambda x: -x["d"])
         items = attach_to_cases(cluster(items[:MAX_PER_SCHOOL], inst), CASES.get(inst, []), inst)
         ok += 1

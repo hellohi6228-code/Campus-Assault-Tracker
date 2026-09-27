@@ -175,3 +175,8 @@ table.yrs { border-collapse: collapse; font-size: .88rem; margin: 4px 0; }
 .mug figcaption { margin-top: 4px; }
 .hit-note { color: var(--link); margin-top: 2px; }
 .item.hit > summary .it-title { background: rgba(255, 213, 0, .25); }
+.finds { border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin: 12px 0; }
+.finds h2 { font-size: 1rem; margin: 0 0 6px; }
+.finds ul { list-style: none; margin: 0; padding: 0; }
+.finds li { padding: 6px 0; border-top: 1px solid var(--border); }
+.finds li:first-child { border-top: 0; }
