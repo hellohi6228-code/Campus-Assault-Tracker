@@ -81,24 +81,8 @@
     });
   }
 
-  var recentTotal = 0, recentRape = 0, allTotal = 0;
-  rows.forEach(function (r) { recentTotal += r.total; recentRape += r.rape; });
-  CLERY.years.forEach(function (y) { var n = CLERY.national[y]; allTotal += n.rape + n.fondling + n.incest + n.statutory; });
 
   // ---- Intro + footer ----
-  var ly = CLERY.years[CLERY.years.length - 1];
-  if (ly) {
-    var nat = CLERY.national[ly];
-    document.getElementById("lede").textContent =
-      num(nat.rape + nat.fondling + nat.incest + nat.statutory) + " sex offenses, including " + num(nat.rape) +
-      " rapes, were reported on US college campuses in " + ly + ". Search any university to see every report it filed and where its public cases are in the legal process.";
-    document.getElementById("big").innerHTML = [
-      [num(allTotal), "sex offenses reported, " + CLERY.years[0] + "–" + ly],
-      [num(recentTotal), "reported " + span + " (" + num(recentRape) + " rapes)"],
-      [num(rows.length), "universities with reports, " + span],
-      [num(CASES.length), "cases with public court, lawsuit or federal records"]
-    ].map(function (x) { return "<div><b>" + x[0] + "</b><span>" + esc(x[1]) + "</span></div>"; }).join("");
-  }
   document.getElementById("footer").innerHTML =
     'Campus numbers: <a href="https://ope.ed.gov/campussafety/" rel="noopener">U.S. Department of Education, Clery Act statistics</a> ' +
     "(rape, fondling, incest and statutory rape reported on campus, non-campus property and adjacent public property). Most assaults are never reported. " +
@@ -157,8 +141,7 @@
       '<tr class="tot"><td>Total reported</td>' + r.perYear.map(function (v) { return '<td class="n">' + num(v[0] + v[1] + v[2]) + "</td>"; }).join("") + "</tr></tbody></table>";
     var html = "<h4>All " + num(r.total) + " reports filed with the federal government, " + span + "</h4>" + yrs +
       '<p class="muted small">Colleges must report every sex offense to the Department of Education under the Clery Act, but only as anonymous counts: no names, dates or details are released for individual reports.</p>';
-    html += "<h4>Reports that became public court, lawsuit or investigation records (" + r.cases.length + ")</h4>" +
-      (r.cases.length ? r.cases.map(caseHTML).join("") : '<p class="muted small">None of this school\'s reports has become a public lawsuit, criminal case or federal investigation in this database yet.</p>');
+    if (r.cases.length) html += "<h4>Cases</h4>" + r.cases.map(caseHTML).join("");
     var news = newsFor(r);
     if (news.length) html += "<h4>Recent news (" + news.length + ")</h4>" + newsListHTML(news, 10);
     return html;
@@ -196,7 +179,6 @@
       }).bindPopup(function () {
         return "<b>" + esc(r.name) + "</b>" + esc(r.place) +
           "<br><b style='display:inline'>" + num(r.total) + "</b> reported sex offenses, " + span + " (" + num(r.rape) + " rape) · rank #" + r.rank +
-          (r.cases.length ? "<br>" + r.cases.length + " case" + (r.cases.length > 1 ? "s" : "") + " with public court/lawsuit records" : "") +
           '<br><a href="#school-' + r.i + '">Open this school ↓</a>';
       }).addTo(map);
     });
@@ -226,7 +208,7 @@
       return '<tr class="click" data-school="' + r.i + '" tabindex="0">' +
         '<td class="n muted">' + r.rank + "</td>" +
         '<td><div class="school">' + esc(r.name) + ' <span class="go">›</span></div>' +
-        '<div class="muted small">' + esc(r.place) + (r.cases.length ? " · " + r.cases.length + " case" + (r.cases.length > 1 ? "s" : "") + " with court/lawsuit records" : "") + "</div>" +
+        '<div class="muted small">' + esc(r.place) + "</div>" +
         (chips ? '<div class="chips">' + chips + "</div>" : "") + "</td>" +
         r.perYear.map(function (v) { return '<td class="n opt">' + num(v[0] + v[1] + v[2]) + "</td>"; }).join("") +
         '<td class="n"><b>' + num(r.total) + '</b></td><td class="n">' + num(r.rape) + "</td></tr>";
@@ -234,9 +216,8 @@
     document.getElementById("rank").innerHTML = head + "<tbody>" + (body || '<tr><td colspan="' + cols + '" class="muted">No university matches “' + esc(term) +
       "”. Schools not listed reported zero sex offenses in " + span + ".</td></tr>") + "</tbody>";
     var sum = list.reduce(function (a, r) { return a + r.total; }, 0);
-    var withCases = list.filter(function (r) { return r.cases.length; }).length;
     document.getElementById("count").textContent = num(sum) + " reported sex offenses at " + num(list.length) + (term ? " matching" : "") +
-      " universities, " + span + ", ranked by number of reports" + (withCases ? " · " + withCases + " with public court/lawsuit records" : "") +
+      " universities, " + span + ", ranked by number of reports" +
       ". Click a university to see all its reports and cases.";
     document.getElementById("more").hidden = list.length <= shown;
     renderNews(term);
@@ -248,10 +229,6 @@
       '<button type="button" class="back" id="back">← Back to results</button>' +
       '<h2 class="school-h">' + esc(r.name) + "</h2>" +
       '<p class="muted">' + esc(r.place) + " · Rank #" + r.rank + " of " + num(rows.length) + " by reported sex offenses, " + span + "</p>" +
-      '<div class="big">' +
-      "<div><b>" + num(r.total) + "</b><span>sex offenses reported, " + span + "</span></div>" +
-      "<div><b>" + num(r.rape) + "</b><span>rapes reported, " + span + "</span></div>" +
-      "<div><b>" + num(r.cases.length) + "</b><span>cases with public court, lawsuit or federal records</span></div></div>" +
       schoolDetailHTML(r) +
       '<button type="button" class="back" id="back2">← Back to results</button>';
     document.getElementById("back").addEventListener("click", goBack);
