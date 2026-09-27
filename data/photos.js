@@ -24,6 +24,12 @@ window.PHOTOS = {
   "page": "https://commons.wikimedia.org/wiki/File:Salomon_Jacob_Cohen_(Published_in_1884).jpg",
   "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c9/Salomon_Jacob_Cohen_%28Published_in_1884%29.jpg/250px-Salomon_Jacob_Cohen_%28Published_in_1884%29.jpg"
  },
+ "Jerome White": {
+  "credit": "War Department. The Adjutant General's Office. 3/4/1907-9/18/1947",
+  "license": "Public domain",
+  "page": "https://commons.wikimedia.org/wiki/File:Military_Service_Record_of_Jerome_White,_United_States_Colored_Troops-_110th_US_Colored_Infantry_-_DPLA_-_b7550baecd1b2b539374d1ed5d458a78_(page_7).jpg",
+  "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/95/Military_Service_Record_of_Jerome_White%2C_United_States_Colored_Troops-_110th_US_Colored_Infantry_-_DPLA_-_b7550baecd1b2b539374d1ed5d458a78_%28page_7%29.jpg/250px-Military_Service_Record_of_Jerome_White%2C_United_States_Colored_Troops-_110th_US_Colored_Infantry_-_DPLA_-_b7550baecd1b2b539374d1ed5d458a78_%28page_7%29.jpg"
+ },
  "Jerry Sandusky": {
   "credit": "Washington High School",
   "license": "Public domain",
