@@ -2,7 +2,7 @@ name: Fetch crime logs
 on:
   workflow_dispatch:
   schedule:
-    - cron: "11 9 * * *"   # daily; logs only keep ~60 days online
+    - cron: "11 */3 * * *"   # every 3 hours: we read only the newest page of each log
   push:
     paths: [scripts/fetch_crime_logs.py, .github/workflows/fetch-crime-logs.yml]
 permissions:
