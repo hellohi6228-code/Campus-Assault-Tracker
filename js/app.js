@@ -78,7 +78,10 @@
 
   CASES.forEach(function (k) {
     var parts = (k.clery || "").split("|");
-    var row = rows.filter(function (r) { return r.raw[0] === parts[0] && r.raw[1].indexOf(parts[1] || "") !== -1; })[0];
+    // Exact branch name wins; otherwise the first branch containing the given text.
+    var same = rows.filter(function (r) { return r.raw[0] === parts[0]; });
+    var row = same.filter(function (r) { return r.raw[1] === parts[1]; })[0] ||
+      same.filter(function (r) { return r.raw[1].indexOf(parts[1] || "") !== -1; })[0];
     if (row) row.cases.push(k);
   });
   rows.forEach(function (r) { r.cases.sort(function (a, b) { return b.reported - a.reported || b.year - a.year; }); });
