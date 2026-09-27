@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Campus Assault Tracker</title>
+  <meta name="description" content="A sourced map and database of documented sexual-assault and abuse cases at US colleges, with case status, institutional accountability, and citations.">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <h1>Campus Assault Tracker</h1>
+      <p class="lede">Documented sexual-assault and abuse cases at US colleges — where they happened, what happened next, and who was held accountable. Every entry links to its sources.</p>
+      <div class="stats" id="stats"></div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="notice" aria-label="Support resources">
+      <strong>If you need support:</strong> RAINN National Sexual Assault Hotline — call <a href="tel:18006564673">800-656-HOPE (4673)</a> or chat at <a href="https://rainn.org" rel="noopener">rainn.org</a>. Free, confidential, 24/7.
+    </section>
+
+    <section class="panel" aria-labelledby="map-h">
+      <div class="panel-head">
+        <h2 id="map-h">Heat map</h2>
+        <div class="toggle" role="group" aria-label="Heat intensity based on">
+          <button type="button" data-weight="affected" class="on">Survivors reported</button>
+          <button type="button" data-weight="cases">Case count</button>
+        </div>
+      </div>
+      <div id="map" role="img" aria-label="Map of the United States showing locations of documented cases"></div>
+      <p class="caption">Intensity reflects documented cases in this dataset, not the true rate of assault on any campus. Most assaults are never reported. Click a dot for details.</p>
+    </section>
+
+    <section class="panel" aria-labelledby="rank-h">
+      <div class="panel-head">
+        <h2 id="rank-h">Rankings</h2>
+        <div class="toggle" role="group" aria-label="Rank by">
+          <button type="button" data-rank="payout" class="on">Settlements &amp; fines</button>
+          <button type="button" data-rank="affected">Survivors reported</button>
+          <button type="button" data-rank="state">By state</button>
+        </div>
+      </div>
+      <ol class="ranking" id="ranking"></ol>
+    </section>
+
+    <section class="panel" aria-labelledby="cases-h">
+      <div class="panel-head">
+        <h2 id="cases-h">All cases</h2>
+      </div>
+      <div class="filters">
+        <input type="search" id="q" placeholder="Search school, state, keyword…" aria-label="Search cases">
+        <select id="status" aria-label="Filter by status">
+          <option value="">All statuses</option>
+        </select>
+        <select id="sort" aria-label="Sort cases">
+          <option value="reported">Newest first</option>
+          <option value="payout">Largest payout</option>
+          <option value="school">School A–Z</option>
+        </select>
+      </div>
+      <p class="count" id="count"></p>
+      <div id="cases" class="cases"></div>
+    </section>
+
+    <section class="panel policy" aria-labelledby="policy-h">
+      <h2 id="policy-h">Data &amp; naming policy</h2>
+      <ul>
+        <li><strong>Sourced only.</strong> Every case cites published reporting, court records, or government findings. Nothing is included from rumor or social media.</li>
+        <li><strong>Survivors are never named</strong>, even when they have chosen to go public.</li>
+        <li><strong>Individuals are named only if convicted in criminal court</strong>, or if deceased and the subject of criminal charges or a university-commissioned investigation. People who are only accused — in a lawsuit, a Title IX process, or the press — are not named, and <strong>no photos of individuals are published</strong>.</li>
+        <li>Why: accusations are sometimes wrong (see Duke and UVA below), a public name-and-face list can't be taken back, and publishing unproven accusations exposes this site and its maintainers to defamation liability. Holding <em>institutions</em> accountable is what this tracker focuses on.</li>
+        <li><strong>Not a prevalence measure.</strong> Big numbers here reflect big, well-reported scandals — not which campus is most dangerous. For per-campus reported-offense counts, see the Department of Education's <a href="https://ope.ed.gov/campussafety/" rel="noopener">Campus Safety and Security (Clery) data</a>.</li>
+        <li>Found an error or a documented case that's missing? Open an issue or pull request on the project's GitHub repository with sources.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="wrap footer">Last updated September 2026 · Case data in <code>data/cases.js</code></footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+  <script src="data/cases.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
