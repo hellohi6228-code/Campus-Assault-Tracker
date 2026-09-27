@@ -42,10 +42,12 @@
   var recentYears = [];
   if (CLERY) {
     recentYears = CLERY.recentYears;
+    var nameCount = {};
+    CLERY.campuses.forEach(function (c) { nameCount[c[0]] = (nameCount[c[0]] || 0) + 1; });
     campuses = CLERY.campuses.map(function (c) {
       var rape = 0, fondl = 0, other = 0;
       c[7].forEach(function (v) { rape += v[0]; fondl += v[1]; other += v[2]; });
-      var label = c[0] + (c[1] && !/^main campus$/i.test(c[1]) ? " — " + c[1] : "");
+      var label = c[0] + (nameCount[c[0]] > 1 && c[1] ? " — " + c[1] : "");
       return {
         name: label, city: c[2], state: c[3], lat: c[4], lng: c[5], enroll: c[6],
         years: c[7], rape: rape, fondl: fondl, other: other, total: rape + fondl + other
@@ -165,7 +167,7 @@
     svg += "</svg>";
     el.innerHTML = svg + '<div class="legend"><span><i class="bar-rape"></i>Rape</span><span><i class="bar-other"></i>Fondling, incest, statutory rape</span></div>';
     document.getElementById("trend-caption").innerHTML =
-      "National totals, all reporting institutions (on-campus + non-campus + public property). 2020 dips because campuses were closed. Source: " +
+      "National totals, all reporting institutions (on-campus + non-campus + public property). The 2020 dip coincides with COVID-19 campus closures. Source: " +
       '<a href="' + esc(CLERY.sourceUrl) + '" rel="noopener">U.S. Dept. of Education Clery Act data</a>.';
   })();
 
@@ -186,7 +188,7 @@
         return { name: s, sub: "", v: t, label: num(t) };
       }).sort(function (a, b) { return b.v - a.v; });
     } else if (mode === "rate") {
-      cap = "Reported sex offenses per 10,000 students per year, " + span + ". Only campuses with 5,000+ students are included, because tiny enrollments distort rates.";
+      cap = "Reported sex offenses per 10,000 students per year, " + span + ". Only campuses with 5,000+ students are included, because tiny enrollments distort rates. Enrollment is institution-wide, so rates for branch campuses are understated.";
       rows = campuses.filter(function (c) { return c.enroll >= 5000; }).map(function (c) {
         var r = (c.total / recentYears.length) / c.enroll * 10000;
         return { name: c.name, sub: c.city + ", " + c.state + " · " + num(c.total) + " reports, " + num(c.enroll) + " students", v: r, label: r.toFixed(1) };
