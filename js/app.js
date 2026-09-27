@@ -156,8 +156,12 @@
     var t = primaryTrack(k);
     // Convicted people link to the official U.S. Department of Justice sex offender registry (photos are published there).
     var named = (k.named || []).map(function (p) {
+      var ph = (window.PHOTOS || {})[p.name];
       return "<b>" + esc(p.name) + "</b> — " + esc(p.basis) +
-        (p.photo ? ' · <a href="' + esc(p.photo) + '" target="_blank" rel="noopener">Photo &amp; coverage ↗</a>' : "") +
+        (ph ? '<figure class="mug"><img src="' + esc(ph.src) + '" alt="' + esc(p.name) + '" loading="lazy">' +
+          '<figcaption class="muted small"><a href="' + esc(ph.page) + '" target="_blank" rel="noopener">Photo</a>: ' +
+          esc(ph.credit) + " · " + esc(ph.license) + "</figcaption></figure>" : "") +
+        (p.photo && !ph ? ' · <a href="' + esc(p.photo) + '" target="_blank" rel="noopener">Photo &amp; coverage ↗</a>' : "") +
         ' · <a href="https://www.nsopw.gov/search-public-sex-offender-registries" target="_blank" rel="noopener">Sex offender registry ↗</a>';
     }).join("<br>");
     return '<details class="item"><summary>' + badge(t ? TRACK_CLASS[t.track] : "t-fed", statusWord(t)) +
