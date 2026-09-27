@@ -1124,6 +1124,28 @@ window.CASES = [
     sources: [{"label": "Cornell Daily Sun (conviction)", "url": "https://www.cornellsun.com/article/2025/12/former-cornell-student-convicted-of-rape-over-2024-on-campus-sexual-assault"}, {"label": "Cornell Daily Sun (sentencing)", "url": "https://www.cornellsun.com/article/2026/02/former-cornell-student-sentenced-to-eight-years-for-2024-on-campus-rape"}, {"label": "The Ithaca Voice", "url": "https://ithacavoice.org/2025/11/former-cornell-student-convicted-of-2024-campus-rape/"}, {"label": "CNY Central", "url": "https://cnycentral.com/news/local/former-cornell-student-convicted-of-rape-of-physically-helpless-person-university-jury-burglary-sentencing-crimes-wstm-wtvh"}]
   },
   {
+    id: "cornell-psiu-2016",
+    school: "Cornell University",
+    city: "Ithaca",
+    state: "NY",
+    lat: 42.4472,
+    lng: -76.4831,
+    clery: "Cornell University|Endowed",
+    keywords: ["Ballinger", "Psi Upsilon"],
+    year: 2016,
+    reported: 2016,
+    title: "Fraternity president pleaded guilty to forcible touching after attempted-rape charges",
+    type: "Student-on-student (fraternity)",
+    summary: "A woman reported that early on January 31, 2016, at the Psi Upsilon fraternity house, she was led to the fraternity president's bedroom, where he forcefully tried to have sex with her although she told him she was not interested and was too intoxicated. He was charged with felony attempted rape, criminal sexual act and sexual abuse, and the fraternity was suspended. In February 2017 he pleaded guilty to forcible touching, a misdemeanor; in April 2017 he was sentenced to six years' probation and a $1,000 fine. Under the plea deal he does not have to register as a sex offender.",
+    status: "Pleaded guilty (Feb 2017) to forcible touching; sentenced to 6 years' probation (Apr 2017). Not on the sex offender registry under the plea deal.",
+    statusCategory: "conviction",
+    tracks: [{"track": "criminal", "step": 5, "state": "closed", "short": "Pleaded guilty; probation", "note": "Charged with felony attempted rape, criminal sexual act and sexual abuse (2016); pleaded guilty to misdemeanor forcible touching (Feb 2017); 6 years' probation and $1,000 fine (Apr 2017)."}],
+    affected: 1,
+    payout: 0,
+    named: [{"name": "Wolfgang Ballinger", "basis": "Pleaded guilty to forcible touching, Feb 2017; sentenced to 6 years' probation", "photo": "https://www.cbsnews.com/news/wolfgang-ballinger-cornell-frat-president-released-denies-sex-assault-charges/", "registry": false}],
+    sources: [{"label": "ABC7 New York (charges)", "url": "https://abc7ny.com/post/cornell-student-from-new-york-city-charged-in-sexual-assault-case/1189737/"}, {"label": "Ithaca Times (grand jury)", "url": "https://www.ithaca.com/news/ballinger-case-goes-to-a-grand-jury/article_06f927fc-d597-11e5-9914-076bc09125a2.html"}, {"label": "Washington Post (sentencing)", "url": "https://www.washingtonpost.com/news/grade-point/wp/2017/04/11/former-cornell-fraternity-president-gets-probation-in-sex-offense-case/"}, {"label": "CNY Central (sentencing)", "url": "https://cnycentral.com/news/local/former-frat-president-at-cornell-sentenced-in-sex-abuse-case"}]
+  },
+  {
     id: "weill-cornell-paduch",
     school: "Cornell University",
     city: "Ithaca",
