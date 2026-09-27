@@ -69,7 +69,7 @@
     var name = c[0].replace(/-Main Campus$/, "");
     var branch = (c[1] || "").trim();
     var city = (c[2] || "").toLowerCase();
-    if (nameCount[c[0]] > 1 && branch && !/main|^university park|^ann arbor|endowed/i.test(branch) && branch !== c[0] &&
+    if (nameCount[c[0]] > 1 && branch && !/main|^university park|^ann arbor|endowed/i.test(branch) && branch !== c[0] && c[0].toLowerCase().indexOf(branch.toLowerCase()) === -1 &&
         !(city && branch.toLowerCase().indexOf(city) !== -1 && c[0].toLowerCase().indexOf(city) !== -1)) name += " — " + branch;
     return name;
   }
@@ -239,23 +239,23 @@
 
   function renderList() {
     var term = q.value.trim().toLowerCase();
-    var list = (!term ? rows.filter(function (r) { return r.count > 0; }) : rows.filter(function (r) {
+    var list = (!term ? rows.slice() : rows.filter(function (r) {
       return matches(r.name + " " + r.place + " " + r.raw[0] + " " + r.raw[1], term) || r.state.toLowerCase() === term ||
         r.cases.some(function (k) { return matches(caseText(k), term); });
-    })).sort(byCount);
-    var head = '<thead><tr><th class="n">#</th><th>University</th><th class="n">Cases</th></tr></thead>';
+    })).sort(function (a, b) { return b.total - a.total || b.count - a.count; });
+    var head = '<thead><tr><th class="n">#</th><th>University</th><th class="n">Reports<div class="th-sub">' + span + '</div></th><th class="n">Cases<div class="th-sub">with details</div></th></tr></thead>';
     var body = list.slice(0, shown).map(function (r, i) {
       return '<tr class="click" data-school="' + r.i + '" tabindex="0">' +
         '<td class="n muted">' + (i + 1) + "</td>" +
         '<td><div class="school">' + esc(r.name) + ' <span class="go">›</span></div>' +
         '<div class="muted small">' + esc(r.place) + "</div></td>" +
-        '<td class="n"><b>' + num(r.count) + "</b></td></tr>";
+        '<td class="n"><b>' + num(r.total) + '</b></td><td class="n">' + (r.count ? num(r.count) : '<span class="muted">0</span>') + "</td></tr>";
     }).join("");
-    document.getElementById("rank").innerHTML = head + "<tbody>" + (body || '<tr><td colspan="3" class="muted">No university matches “' + esc(term) + "”.</td></tr>") + "</tbody>";
-    var total = list.reduce(function (a, r) { return a + r.count; }, 0);
-    document.getElementById("count").textContent = term
-      ? num(list.length) + " matching universities · " + num(total) + " cases. Tap a university to see every case."
-      : num(list.length) + " universities with public cases · " + num(total) + " cases. Search to find any of the " + num(rows.length) + " campuses.";
+    document.getElementById("rank").innerHTML = head + "<tbody>" + (body || '<tr><td colspan="4" class="muted">No university matches “' + esc(term) + "”.</td></tr>") + "</tbody>";
+    var reports = list.reduce(function (a, r) { return a + r.total; }, 0);
+    var cases = list.reduce(function (a, r) { return a + r.count; }, 0);
+    document.getElementById("count").textContent = num(reports) + " sex offenses reported to the federal government at " + num(list.length) +
+      (term ? " matching" : "") + " universities (" + span + "). " + num(cases) + " of them have public case details you can open. Tap a university.";
     document.getElementById("more").hidden = list.length <= shown;
     renderNews(term);
   }
@@ -268,13 +268,13 @@
       '<button type="button" class="back" id="back">← Back to results</button>' +
       '<h2 class="school-h">' + esc(r.name) + "</h2>" +
       '<p class="muted small">' + esc(r.place) + "</p>" +
-      '<h4 id="case-count">Cases (' + num(r.count) + ")</h4>" +
+      '<p class="fed-top"><b>' + num(r.total) + "</b> sex offenses reported, " + span + " (" + num(r.rape) +
+      ' rape). Schools report these to the government only as counts, with no names, dates or details.</p>' +
+      '<h4 id="case-count">Cases with public details (' + num(r.count) + ")</h4>" +
       '<p class="legend small">' + badge("t-crim", "Criminal") + " " + badge("t-civ", "Civil") + " " + badge("t-sch", "School") + " " + badge("t-fed", "Federal") +
       ' <span class="muted">Tap a case for details.</span></p>' +
       '<div class="items" id="items">' + r.cases.map(caseItem).join("") + "</div>" +
       (r.count ? "" : '<p class="muted">No public cases on file for this school yet.</p>') +
-      '<p class="muted small fed">Federal Clery statistics, ' + span + ": " + num(r.total) + " sex offenses reported (" + num(r.rape) +
-      " rape). These are anonymous counts; schools do not publish details for them.</p>" +
       '<div id="school-news"></div>';
     loadCrimeLog(r, token);
     loadSchoolNews(r);
@@ -311,7 +311,7 @@
       .then(function (entries) {
         if (current !== r || token !== renderToken || !entries.length) return;
         document.getElementById("items").insertAdjacentHTML("beforeend", entries.map(logItem).join(""));
-        document.getElementById("case-count").textContent = "Cases (" + num(r.cases.length + entries.length) + ")";
+        document.getElementById("case-count").textContent = "Cases with public details (" + num(r.cases.length + entries.length) + ")";
       }, function () {});
   }
 

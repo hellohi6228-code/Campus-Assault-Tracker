@@ -163,3 +163,6 @@ table.yrs { border-collapse: collapse; font-size: .88rem; margin: 4px 0; }
 .it-body dl { display: grid; grid-template-columns: max-content 1fr; gap: 2px 12px; margin: 6px 0; font-size: .9rem; }
 .it-body dt { color: var(--muted); } .it-body dd { margin: 0; }
 .fed { margin-top: 14px; }
+.th-sub { font-weight: 400; font-size: .68rem; }
+.fed-top { margin: 6px 0 2px; }
+.fed-top b { font-size: 1.3rem; color: var(--accent); }
