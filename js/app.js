@@ -258,9 +258,8 @@
     }).join("");
     document.getElementById("rank").innerHTML = head + "<tbody>" + (body || '<tr><td colspan="4" class="muted">No university matches “' + esc(term) + "”.</td></tr>") + "</tbody>";
     var reports = list.reduce(function (a, r) { return a + r.total; }, 0);
-    var cases = list.reduce(function (a, r) { return a + r.count; }, 0);
     document.getElementById("count").textContent = num(reports) + " sex offenses reported to the federal government at " + num(list.length) +
-      (term ? " matching" : "") + " universities (" + span + "). " + num(cases) + " cases and news reports you can open. Tap a university.";
+      (term ? " matching" : "") + " universities (" + span + ").";
     document.getElementById("more").hidden = list.length <= shown;
     renderNews(term);
   }
