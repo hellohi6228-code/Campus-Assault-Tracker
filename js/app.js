@@ -24,6 +24,8 @@
   var span = years.length ? years[0] + "–" + years[years.length - 1] : "";
   // Schools report a year's counts the following fall and the government publishes them after that, so the
   // federal figures always trail; cases, news and crime logs on this site are current.
+  // National total includes the few campuses the federal directory gives no location for (not on the map).
+  var nationalTotal = years.reduce(function (a, y) { var n = CLERY.national[y]; return a + n.rape + n.fondling + n.incest + n.statutory; }, 0);
   var lastYear = years[years.length - 1], thisYear = new Date().getFullYear();
   var pendingNote = lastYear < thisYear ? " Federal figures for " + (lastYear + 1) + (thisYear > lastYear + 1 ? "–" + thisYear : "") +
     " are not published yet; cases, news and crime-log reports below run through " + thisYear + "." : "";
@@ -296,8 +298,9 @@
     }).join("");
     document.getElementById("rank").innerHTML = head + "<tbody>" + (body || '<tr><td colspan="4" class="muted">No university matches “' + esc(term) + "”.</td></tr>") + "</tbody>";
     var reports = list.reduce(function (a, r) { return a + r.total; }, 0);
-    document.getElementById("count").textContent = num(reports) + " sex offenses reported to the federal government at " + num(list.length) +
-      (term ? " matching" : "") + " universities (" + span + ")." + pendingNote;
+    document.getElementById("count").textContent = term
+      ? num(reports) + " sex offenses reported to the federal government at " + num(list.length) + " matching universities (" + span + ")."
+      : num(nationalTotal) + " sex offenses reported to the federal government by US colleges (" + span + ")." + pendingNote;
     document.getElementById("more").hidden = list.length <= shown;
     renderNews(term);
   }
