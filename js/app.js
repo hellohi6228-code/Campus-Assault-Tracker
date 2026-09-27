@@ -68,7 +68,9 @@
   function displayName(c) {
     var name = c[0].replace(/-Main Campus$/, "");
     var branch = (c[1] || "").trim();
-    if (nameCount[c[0]] > 1 && branch && !/main|^university park|^ann arbor|endowed/i.test(branch) && branch !== c[0]) name += " — " + branch;
+    var city = (c[2] || "").toLowerCase();
+    if (nameCount[c[0]] > 1 && branch && !/main|^university park|^ann arbor|endowed/i.test(branch) && branch !== c[0] &&
+        !(city && branch.toLowerCase().indexOf(city) !== -1 && c[0].toLowerCase().indexOf(city) !== -1)) name += " — " + branch;
     return name;
   }
 
@@ -95,7 +97,6 @@
   });
   rows.forEach(function (r) { r.cases.sort(function (a, b) { return b.reported - a.reported || b.year - a.year; }); });
   var ranked = rows.slice().sort(function (a, b) { return b.total - a.total; });
-  ranked.forEach(function (r, i) { r.rank = i + 1; });
 
 
 
@@ -117,24 +118,46 @@
     document.getElementById("process-body").innerHTML = html + "</div>";
   })();
 
-  function trackName(t) { return PROCESS[t.track].label.replace(/ \(.*\)/, ""); }
-  function stageChip(t) {
-    return '<span class="chip ' + (t.state === "active" ? "live" : "") + '">' + esc(trackName(t)) + ": " + esc(t.short || PROCESS[t.track].steps[t.step][0]) + "</span>";
+  // One-word status for a case, colored by the track it is on (criminal, civil, school, federal).
+  var TRACK_CLASS = { criminal: "t-crim", civil: "t-civ", campus: "t-sch", federal: "t-fed" };
+  var TRACK_WORD = { criminal: "Criminal", civil: "Civil", campus: "School", federal: "Federal" };
+  function primaryTrack(k) {
+    var tr = k.tracks || [];
+    return tr.filter(function (t) { return t.state === "active"; })[0] || tr[0] || null;
   }
+  var STATUS_RULES = [
+    [/mistrial/i, "Mistrial"], [/died/i, "Died"], [/retract/i, "Retracted"], [/innocent|charges dropped/i, "Dropped"],
+    [/guilty|convict/i, "Convicted"], [/settle|paid out/i, "Settled"], [/dismiss/i, "Dismissed"],
+    [/no charges|declin|not indict/i, "Declined"], [/charged|indicted/i, "Charged"],
+    [/investigat/i, "Investigating"], [/filed/i, "Filed"], [/fine/i, "Fined"],
+    [/expel|suspend|banned|sanction|responsible|disciplin|essay|probation/i, "Disciplined"],
+    [/reform|agreement|monitor|violation|policy|ruled/i, "Resolved"]
+  ];
+  function statusWord(t) {
+    if (!t) return "Reported";
+    var texts = [t.short || "", (t.short || "") + " " + (t.note || "")];
+    for (var n = 0; n < texts.length; n++) {
+      for (var i = 0; i < STATUS_RULES.length; i++) if (STATUS_RULES[i][0].test(texts[n])) return STATUS_RULES[i][1];
+    }
+    return t.state === "active" ? "Active" : "Closed";
+  }
+  function badge(cls, word) { return '<span class="st ' + cls + '">' + esc(word) + "</span>"; }
   function stepperHTML(t) {
     var P = PROCESS[t.track];
     var steps = P.steps.map(function (s, i) {
       var cls = i < t.step ? "done" : i === t.step ? (t.state === "active" ? "now" : "end") : "todo";
       return '<li class="' + cls + '" title="' + esc(s[1]) + '">' + esc(s[0]) + "</li>";
     }).join("");
-    return '<div class="track"><div class="track-h"><b>' + esc(P.label) + '</b> <span class="state ' + t.state + '">' +
-      (t.state === "active" ? "● Active" : "Closed") + "</span> — " + esc(t.short || "") + '</div><ol class="stepper">' + steps +
+    return '<div class="track"><div class="track-h">' + badge(TRACK_CLASS[t.track], TRACK_WORD[t.track]) + " <b>" + esc(statusWord(t)) +
+      '</b> <span class="state ' + t.state + '">' + (t.state === "active" ? "● Active" : "Closed") + '</span></div><ol class="stepper">' + steps +
       '</ol><p class="small">' + esc(t.note) + "</p></div>";
   }
-  function caseHTML(k) {
+  function caseItem(k) {
+    var t = primaryTrack(k);
     var named = (k.named || []).map(function (p) { return "<b>" + esc(p.name) + "</b> — " + esc(p.basis); }).join("<br>");
-    return '<div class="case"><div class="case-h"><b>' + esc(k.title) + "</b></div>" +
-      '<div class="muted small">Incident: ' + esc(k.year) + " · Became public: " + esc(k.reported) + " · " + esc(k.type) + "</div>" +
+    return '<details class="item"><summary>' + badge(t ? TRACK_CLASS[t.track] : "t-fed", statusWord(t)) +
+      ' <span class="it-title">' + esc(k.title) + '</span> <span class="muted small">' + esc(k.year) + "</span></summary>" +
+      '<div class="it-body"><div class="muted small">Incident: ' + esc(k.year) + " · Became public: " + esc(k.reported) + " · " + esc(k.type) + "</div>" +
       "<p>" + esc(k.summary) + "</p>" +
       (k.tracks || []).map(stepperHTML).join("") +
       "<p><b>Current status:</b> " + esc(k.status) + (k.payout ? " · <b>Paid:</b> " + money(k.payout) : "") + "</p>" +
@@ -142,8 +165,34 @@
       (k.namingNote ? '<p class="muted small">' + esc(k.namingNote) + "</p>" : "") +
       '<p class="src">Sources: ' + k.sources.map(function (s) {
         return '<a href="' + esc(s.url) + '" target="_blank" rel="noopener">' + esc(s.label) + "</a>";
-      }).join(" · ") + "</p></div>";
+      }).join(" · ") + "</p></div></details>";
   }
+  function logItem(e) {
+    var word = (e.disposition || "Reported").split(/[\s\/,-]+/)[0];
+    word = word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    return '<details class="item"><summary>' + badge("t-crim", word) + ' <span class="it-title">' +
+      esc(e.nature || (e.offenses || []).join(", ")) + '</span> <span class="muted small">' + esc((e.reported || "").split(" ")[0]) + "</span></summary>" +
+      '<div class="it-body"><p class="muted small">Campus police Daily Crime Log entry. Logs never include names.</p><dl>' +
+      "<dt>Offense</dt><dd>" + esc((e.offenses || []).join(", ")) + "</dd>" +
+      "<dt>Reported</dt><dd>" + esc(e.reported) + "</dd>" +
+      (e.occurred ? "<dt>Occurred</dt><dd>" + esc(e.occurred) + "</dd>" : "") +
+      "<dt>Location</dt><dd>" + esc(e.location) + "</dd>" +
+      "<dt>Status</dt><dd>" + esc(e.disposition || "Not stated") + "</dd>" +
+      "<dt>Incident #</dt><dd>" + esc(e.id) + "</dd></dl></div></details>";
+  }
+
+  function slug(name) { return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80); }
+  var firstRow = {};
+  rows.forEach(function (r) { if (!(r.raw[0] in firstRow)) firstRow[r.raw[0]] = r; r.logCount = 0; r.count = r.cases.length; });
+  function applyLogIndex(idx) {
+    idx = idx || {};
+    Object.keys(firstRow).forEach(function (name) {
+      var r = firstRow[name];
+      r.logCount = idx[slug(name)] || 0;
+      r.count = r.cases.length + r.logCount;
+    });
+  }
+  function byCount(a, b) { return b.count - a.count || b.total - a.total; }
 
   // ---- State: search results list, or one school's page ----
   var q = document.getElementById("q");
@@ -176,7 +225,7 @@
         color: accent, weight: r.cases.length ? 2 : 1, fillColor: accent, fillOpacity: r.cases.length ? 0.8 : 0.35
       }).bindPopup(function () {
         return "<b>" + esc(r.name) + "</b>" + esc(r.place) +
-          "<br><b style='display:inline'>" + num(r.total) + "</b> reported sex offenses, " + span + " (" + num(r.rape) + " rape) · rank #" + r.rank +
+          "<br><b style='display:inline'>" + num(r.count) + "</b> case" + (r.count === 1 ? "" : "s") + " · " + num(r.total) + " federal reports, " + span +
           '<br><a href="#school-' + r.i + '">Open this school ↓</a>';
       }).addTo(map);
     });
@@ -190,53 +239,49 @@
 
   function renderList() {
     var term = q.value.trim().toLowerCase();
-    var list = !term ? ranked : ranked.filter(function (r) {
+    var list = (!term ? rows.filter(function (r) { return r.count > 0; }) : rows.filter(function (r) {
       return matches(r.name + " " + r.place + " " + r.raw[0] + " " + r.raw[1], term) || r.state.toLowerCase() === term ||
         r.cases.some(function (k) { return matches(caseText(k), term); });
-    });
-    var head = '<thead><tr><th class="n">#</th><th>University</th>' +
-      years.map(function (y) { return '<th class="n opt">' + y + "</th>"; }).join("") +
-      '<th class="n">Reports</th><th class="n">Rape</th></tr></thead>';
-    var cols = 4 + years.length;
-    var body = list.slice(0, shown).map(function (r) {
-      var chips = r.cases.map(function (k) {
-        var t = (k.tracks || []).filter(function (x) { return x.state === "active"; })[0] || (k.tracks || [])[0];
-        return t ? stageChip(t) : "";
-      }).join(" ");
+    })).sort(byCount);
+    var head = '<thead><tr><th class="n">#</th><th>University</th><th class="n">Cases</th></tr></thead>';
+    var body = list.slice(0, shown).map(function (r, i) {
       return '<tr class="click" data-school="' + r.i + '" tabindex="0">' +
-        '<td class="n muted">' + r.rank + "</td>" +
+        '<td class="n muted">' + (i + 1) + "</td>" +
         '<td><div class="school">' + esc(r.name) + ' <span class="go">›</span></div>' +
-        '<div class="muted small">' + esc(r.place) + "</div>" +
-        (chips ? '<div class="chips">' + chips + "</div>" : "") + "</td>" +
-        r.perYear.map(function (v) { return '<td class="n opt">' + num(v[0] + v[1] + v[2]) + "</td>"; }).join("") +
-        '<td class="n"><b>' + num(r.total) + '</b></td><td class="n">' + num(r.rape) + "</td></tr>";
+        '<div class="muted small">' + esc(r.place) + "</div></td>" +
+        '<td class="n"><b>' + num(r.count) + "</b></td></tr>";
     }).join("");
-    document.getElementById("rank").innerHTML = head + "<tbody>" + (body || '<tr><td colspan="' + cols + '" class="muted">No university matches “' + esc(term) +
-      "”. Schools not listed reported zero sex offenses in " + span + ".</td></tr>") + "</tbody>";
-    var sum = list.reduce(function (a, r) { return a + r.total; }, 0);
-    document.getElementById("count").textContent = num(sum) + " reported sex offenses at " + num(list.length) + (term ? " matching" : "") +
-      " universities, " + span + ", ranked by number of reports" +
-      ". Click a university to see all its reports and cases.";
+    document.getElementById("rank").innerHTML = head + "<tbody>" + (body || '<tr><td colspan="3" class="muted">No university matches “' + esc(term) + "”.</td></tr>") + "</tbody>";
+    var total = list.reduce(function (a, r) { return a + r.count; }, 0);
+    document.getElementById("count").textContent = term
+      ? num(list.length) + " matching universities · " + num(total) + " cases. Tap a university to see every case."
+      : num(list.length) + " universities with public cases · " + num(total) + " cases. Search to find any of the " + num(rows.length) + " campuses.";
     document.getElementById("more").hidden = list.length <= shown;
     renderNews(term);
   }
 
   // ---- One school's page ----
+  var renderToken = 0;   // guards async loaders when a school view is re-rendered
   function renderSchool(r) {
+    var token = ++renderToken;
     document.getElementById("school").innerHTML =
       '<button type="button" class="back" id="back">← Back to results</button>' +
       '<h2 class="school-h">' + esc(r.name) + "</h2>" +
-      '<p class="muted small">' + esc(r.place) + " · " + num(r.total) + " sex offenses reported, " + span + " (" + num(r.rape) + " rape)</p>" +
-      (r.cases.length ? r.cases.map(caseHTML).join("") : '<p class="muted">No court or lawsuit records on file for this school yet.</p>') +
-      '<div id="school-log"></div>' +
+      '<p class="muted small">' + esc(r.place) + "</p>" +
+      '<h4 id="case-count">Cases (' + num(r.count) + ")</h4>" +
+      '<p class="legend small">' + badge("t-crim", "Criminal") + " " + badge("t-civ", "Civil") + " " + badge("t-sch", "School") + " " + badge("t-fed", "Federal") +
+      ' <span class="muted">Tap a case for details.</span></p>' +
+      '<div class="items" id="items">' + r.cases.map(caseItem).join("") + "</div>" +
+      (r.count ? "" : '<p class="muted">No public cases on file for this school yet.</p>') +
+      '<p class="muted small fed">Federal Clery statistics, ' + span + ": " + num(r.total) + " sex offenses reported (" + num(r.rape) +
+      " rape). These are anonymous counts; schools do not publish details for them.</p>" +
       '<div id="school-news"></div>';
-    loadCrimeLog(r);
+    loadCrimeLog(r, token);
     loadSchoolNews(r);
     document.getElementById("back").addEventListener("click", goBack);
   }
 
   // News coverage for one school: the archive file built weekly for every school, plus this week's feed.
-  function slug(name) { return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80); }
   function loadSchoolNews(r) {
     var box = document.getElementById("school-news");
     var fromFeed = newsFor(r);
@@ -258,25 +303,15 @@
       .then(paint, function () {});
   }
 
-  // Individual reports from the school's Daily Crime Log (collected daily; see scripts/fetch_crime_logs.py).
-  function loadCrimeLog(r) {
+  // Individual reports from the school's Daily Crime Log become case rows (see scripts/fetch_crime_logs.py).
+  function loadCrimeLog(r, token) {
+    if (firstRow[r.raw[0]] !== r || !r.logCount) return;
     fetch("data/crimelog/" + slug(r.raw[0]) + ".json", { cache: "no-cache" })
       .then(function (res) { return res.ok ? res.json() : []; })
-      .then(function (rows) {
-        if (current !== r || !rows.length) return;
-        document.getElementById("school-log").innerHTML =
-          "<h4>Reports in the campus crime log (" + rows.length + ")</h4>" +
-          '<p class="muted small">From the school police Daily Crime Log, checked every 3 hours since Sept 27, 2026. Logs never include names.</p>' +
-          '<div class="log">' + rows.map(function (e) {
-            return "<details><summary><span class=\"log-date\">" + esc((e.reported || "").split(" ")[0]) + "</span> " +
-              esc(e.nature || (e.offenses || []).join(", ")) + "</summary><dl>" +
-              "<dt>Offense</dt><dd>" + esc((e.offenses || []).join(", ")) + "</dd>" +
-              "<dt>Reported</dt><dd>" + esc(e.reported) + "</dd>" +
-              (e.occurred ? "<dt>Occurred</dt><dd>" + esc(e.occurred) + "</dd>" : "") +
-              "<dt>Location</dt><dd>" + esc(e.location) + "</dd>" +
-              "<dt>Status</dt><dd>" + esc(e.disposition || "Not stated") + "</dd>" +
-              "<dt>Incident #</dt><dd>" + esc(e.id) + "</dd></dl></details>";
-          }).join("") + "</div>";
+      .then(function (entries) {
+        if (current !== r || token !== renderToken || !entries.length) return;
+        document.getElementById("items").insertAdjacentHTML("beforeend", entries.map(logItem).join(""));
+        document.getElementById("case-count").textContent = "Cases (" + num(r.cases.length + entries.length) + ")";
       }, function () {});
   }
 
@@ -342,4 +377,7 @@
   document.getElementById("more").addEventListener("click", function () { shown += 100; renderList(); });
   document.getElementById("news-more").addEventListener("click", function () { newsShown += 20; renderNews(q.value.trim().toLowerCase()); });
   show();
+  fetch("data/crimelog/index.json", { cache: "no-cache" })
+    .then(function (res) { return res.ok ? res.json() : {}; })
+    .then(function (idx) { applyLogIndex(idx); show(); }, function () {});
 })();
