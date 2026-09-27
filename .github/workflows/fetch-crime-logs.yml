@@ -29,6 +29,6 @@ jobs:
           git pull --rebase
           git stash pop
           python scripts/build_search_index.py
-          git add data/crimelog data/search-index.json
+          git add data/crimelog data/search-index.json data/new-finds.json
           git commit -m "Update crime log entries"
           git push

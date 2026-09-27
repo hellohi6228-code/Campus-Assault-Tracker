@@ -6,7 +6,7 @@
   <title>Campus Assault Tracker</title>
   <meta name="description" content="Every sex offense reported by US colleges under the Clery Act, mapped and ranked by campus, with documented lawsuits and investigations.">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-  <link rel="stylesheet" href="css/style.css?v=202609272350">
+  <link rel="stylesheet" href="css/style.css?v=202609280010">
 </head>
 <body>
   <main class="wrap">
@@ -17,6 +17,7 @@
     <div class="controls" id="controls">
       <input type="search" id="q" placeholder="Search any university, person, city, state, case or headline…" aria-label="Search universities and cases" autocomplete="off">
     </div>
+    <section class="finds" id="finds" hidden aria-labelledby="finds-h"><h2 id="finds-h">New finds</h2><ul id="finds-list"></ul></section>
     <details class="process" id="process"><summary>How a sexual assault case moves through the legal system</summary><div id="process-body"></div></details>
     <p class="count" id="count"></p>
     <section id="school" class="school-page" hidden></section>
@@ -36,12 +37,12 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
-  <script src="data/us-states.js?v=202609272350"></script>
-  <script src="data/clery.js?v=202609272350"></script>
-  <script src="data/process.js?v=202609272350"></script>
-  <script src="data/cases.js?v=202609272350"></script>
-  <script src="data/news.js?v=202609272350"></script>
-  <script src="data/photos.js?v=202609272350"></script>
-  <script src="js/app.js?v=202609272350"></script>
+  <script src="data/us-states.js?v=202609280010"></script>
+  <script src="data/clery.js?v=202609280010"></script>
+  <script src="data/process.js?v=202609280010"></script>
+  <script src="data/cases.js?v=202609280010"></script>
+  <script src="data/news.js?v=202609280010"></script>
+  <script src="data/photos.js?v=202609280010"></script>
+  <script src="js/app.js?v=202609280010"></script>
 </body>
 </html>

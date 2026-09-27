@@ -303,6 +303,22 @@
       : num(nationalTotal) + " sex offenses reported to the federal government by US colleges (" + span + ")." + pendingNote;
     document.getElementById("more").hidden = list.length <= shown;
     renderNews(term);
+    renderFinds(term);
+  }
+
+  // ---- New finds: the newest stories and crime-log reports across all schools (data/new-finds.json) ----
+  var finds = [];
+  function renderFinds(term) {
+    var box = document.getElementById("finds");
+    box.hidden = !!term || !finds.length;
+    if (box.hidden) return;
+    document.getElementById("finds-list").innerHTML = finds.slice(0, 5).map(function (f) {
+      var r = rows.filter(function (x) { return firstRow[x.raw[0]] === x && slug(x.raw[0]) === f.slug; })[0];
+      var title = f.u ? '<a href="' + esc(f.u) + '" target="_blank" rel="noopener">' + esc(f.t) + "</a>" : esc(f.t);
+      return "<li>" + badge(f.k === "log" ? "t-crim" : "t-news", f.k === "log" ? "Police" : "News") + " " + title +
+        '<div class="muted small">' + (r ? '<a href="#school-' + r.i + '" class="finds-school" data-school="' + r.i + '">' + esc(r.name) + "</a>" : esc(f.school)) +
+        " · " + fmtDate(f.d) + "</div></li>";
+    }).join("");
   }
 
   // ---- One school's page ----
@@ -392,7 +408,7 @@
   function show() {
     var m = location.hash.match(/^#school-(\d+)$/);
     var r = m ? rows[+m[1]] : null;
-    var listEls = ["process", "count", "results", "more", "news-section"];
+    var listEls = ["finds", "process", "count", "results", "more", "news-section"];
     if (r) {
       if (!current) listScroll = window.scrollY;
       current = r;
@@ -454,6 +470,15 @@
   fetch("data/crimelog/index.json", { cache: "no-cache" })
     .then(function (res) { return res.ok ? res.json() : {}; })
     .then(function (idx) { logIdx = idx || {}; recount(); show(); }, function () {});
+  fetch("data/new-finds.json", { cache: "no-cache" })
+    .then(function (res) { return res.ok ? res.json() : []; })
+    .then(function (list) { finds = list || []; if (!current) renderFinds(q.value.trim().toLowerCase()); }, function () {});
+  document.getElementById("finds-list").addEventListener("click", function (e) {
+    var a = e.target.closest(".finds-school");
+    if (!a) return;
+    e.preventDefault();
+    openSchool(+a.getAttribute("data-school"));
+  });
   fetch("data/search-index.json", { cache: "no-cache" })
     .then(function (res) { return res.ok ? res.json() : {}; })
     .then(function (idx) { searchIdx = idx || {}; if (!current && q.value.trim()) renderList(); }, function () {});
