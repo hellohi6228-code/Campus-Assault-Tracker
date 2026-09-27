@@ -25,31 +25,6 @@
   var nameCount = {};
   CLERY.campuses.forEach(function (c) { nameCount[c[0]] = (nameCount[c[0]] || 0) + 1; });
 
-  // Short names used in headlines, so news can be matched to a school.
-  var ALIASES = {
-    "Louisiana State University and Agricultural & Mechanical College": ["LSU"],
-    "University of California-Los Angeles": ["UCLA"],
-    "University of Southern California": ["USC"],
-    "Brigham Young University": ["BYU"],
-    "University of North Carolina at Chapel Hill": ["UNC", "Chapel Hill"],
-    "North Carolina State University at Raleigh": ["NC State", "N.C. State"],
-    "Ohio State University-Main Campus": ["Ohio State"],
-    "Pennsylvania State University-Main Campus": ["Penn State"],
-    "Michigan State University": ["Michigan State"],
-    "Florida State University": ["Florida State", "FSU"],
-    "California State University-San Marcos": ["Cal State San Marcos", "CSU San Marcos", "CSUSM"],
-    "University of California-Berkeley": ["UC Berkeley"],
-    "University of Michigan-Ann Arbor": ["University of Michigan"],
-    "Columbia University in the City of New York": ["Columbia"]
-  };
-  function newsKeys(name) {
-    var keys = (ALIASES[name] || []).slice();
-    var base = name.split("-")[0].trim();
-    keys.push(base);
-    var m = base.match(/^(?:The )?([A-Z][\w.&' ]*?) (?:University|College)$/);
-    if (m && m[1].split(" ").length <= 2) keys.push(m[1]); // "Cornell University" -> "Cornell"
-    return keys.map(function (k) { return k.toLowerCase(); });
-  }
 
   var rows = CLERY.campuses.map(function (c, i) {
     var rape = 0, total = 0;
@@ -60,7 +35,7 @@
       name: c[0] + (nameCount[c[0]] > 1 && c[1] ? " — " + c[1] : ""),
       place: [c[2], state].filter(Boolean).join(", "),
       state: state, lat: c[4], lng: c[5], enroll: c[6],
-      perYear: c[7], rape: rape, total: total, cases: [], keys: newsKeys(c[0])
+      perYear: c[7], rape: rape, total: total, cases: []
     };
   });
 
@@ -73,13 +48,6 @@
   var ranked = rows.slice().sort(function (a, b) { return b.total - a.total; });
   ranked.forEach(function (r, i) { r.rank = i + 1; });
 
-  function newsFor(r) {
-    if (!NEWS) return [];
-    return NEWS.items.filter(function (n) {
-      var t = n.t.toLowerCase();
-      return r.keys.some(function (k) { return t.indexOf(k) !== -1; });
-    });
-  }
 
 
   // ---- Intro + footer ----
@@ -126,25 +94,6 @@
       '<p class="src">Sources: ' + k.sources.map(function (s) {
         return '<a href="' + esc(s.url) + '" target="_blank" rel="noopener">' + esc(s.label) + "</a>";
       }).join(" · ") + "</p></div>";
-  }
-  function newsListHTML(list, limit) {
-    return '<ul class="mini-news">' + list.slice(0, limit).map(function (n) {
-      return '<li><a href="' + esc(n.u) + '" target="_blank" rel="noopener">' + esc(n.t) + '</a> <span class="muted small">' + esc(n.s) + " · " + fmtDate(n.d) + "</span></li>";
-    }).join("") + "</ul>";
-  }
-  function schoolDetailHTML(r) {
-    var yrs = '<table class="yrs"><thead><tr><th></th>' + years.map(function (y) { return '<th class="n">' + y + "</th>"; }).join("") +
-      "</tr></thead><tbody>" +
-      [["Rape", 0], ["Fondling", 1], ["Incest / statutory rape", 2]].map(function (x) {
-        return "<tr><td>" + x[0] + "</td>" + r.perYear.map(function (v) { return '<td class="n">' + num(v[x[1]]) + "</td>"; }).join("") + "</tr>";
-      }).join("") +
-      '<tr class="tot"><td>Total reported</td>' + r.perYear.map(function (v) { return '<td class="n">' + num(v[0] + v[1] + v[2]) + "</td>"; }).join("") + "</tr></tbody></table>";
-    var html = "<h4>All " + num(r.total) + " reports filed with the federal government, " + span + "</h4>" + yrs +
-      '<p class="muted small">Colleges must report every sex offense to the Department of Education under the Clery Act, but only as anonymous counts: no names, dates or details are released for individual reports.</p>';
-    if (r.cases.length) html += "<h4>Cases</h4>" + r.cases.map(caseHTML).join("");
-    var news = newsFor(r);
-    if (news.length) html += "<h4>Recent news (" + news.length + ")</h4>" + newsListHTML(news, 10);
-    return html;
   }
 
   // ---- State: search results list, or one school's page ----
@@ -228,24 +177,22 @@
     document.getElementById("school").innerHTML =
       '<button type="button" class="back" id="back">← Back to results</button>' +
       '<h2 class="school-h">' + esc(r.name) + "</h2>" +
-      '<p class="muted">' + esc(r.place) + " · Rank #" + r.rank + " of " + num(rows.length) + " by reported sex offenses, " + span + "</p>" +
-      schoolDetailHTML(r) +
-      '<button type="button" class="back" id="back2">← Back to results</button>';
+      '<p class="muted small">' + esc(r.place) + " · " + num(r.total) + " sex offenses reported, " + span + " (" + num(r.rape) + " rape)</p>" +
+      (r.cases.length ? r.cases.map(caseHTML).join("") : '<p class="muted">No public cases on file for this school.</p>');
     document.getElementById("back").addEventListener("click", goBack);
-    document.getElementById("back2").addEventListener("click", goBack);
   }
 
   function show() {
     var m = location.hash.match(/^#school-(\d+)$/);
     var r = m ? rows[+m[1]] : null;
-    var listEls = ["controls", "process", "count", "results", "more", "news-section"];
+    var listEls = ["process", "count", "results", "more", "news-section"];
     if (r) {
       if (!current) listScroll = window.scrollY;
       current = r;
       listEls.forEach(function (id) { document.getElementById(id).hidden = true; });
       document.getElementById("school").hidden = false;
       renderSchool(r);
-      document.getElementById("school").scrollIntoView({ block: "start" });
+      document.getElementById("controls").scrollIntoView({ block: "start" });
     } else {
       var wasSchool = !!current;
       current = null;
@@ -290,7 +237,10 @@
     document.getElementById("news-more").hidden = list.length <= newsShown;
   }
 
-  q.addEventListener("input", function () { shown = 50; newsShown = 15; renderList(); });
+  q.addEventListener("input", function () {
+    shown = 50; newsShown = 15;
+    if (current) { history.replaceState(null, "", location.pathname + location.search); show(); } else renderList();
+  });
   document.getElementById("more").addEventListener("click", function () { shown += 100; renderList(); });
   document.getElementById("news-more").addEventListener("click", function () { newsShown += 20; renderNews(q.value.trim().toLowerCase()); });
   show();
