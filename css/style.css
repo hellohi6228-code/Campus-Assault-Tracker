@@ -95,3 +95,11 @@ tr.detail td { background: var(--bg); }
 .stepper li.now { background: var(--accent); border-color: var(--accent); color: var(--surface); font-weight: 600; }
 .stepper li.end { background: var(--text); border-color: var(--text); color: var(--surface); font-weight: 600; }
 .stepper li.todo { opacity: .55; border-style: dashed; }
+
+.news { margin-top: 32px; }
+.news h2 { margin: 0 0 2px; font-size: 1.25rem; }
+.news ul { list-style: none; margin: 10px 0 0; padding: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; }
+.news li { padding: 10px 14px; border-top: 1px solid var(--border); }
+.news li:first-child { border-top: 0; }
+.news a { font-weight: 600; text-decoration: none; }
+.news a:hover { text-decoration: underline; }
