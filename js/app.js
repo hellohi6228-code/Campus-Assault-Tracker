@@ -164,12 +164,13 @@
     return html;
   }
 
-  // ---- Map (bundled state outlines: no tile service or API key) ----
+  // ---- State: search results list, or one school's page ----
   var q = document.getElementById("q");
-  var view = "schools";
   var shown = 50;
-  var open = {};
+  var current = null;      // row shown on the school page, or null for the results list
+  var listScroll = 0;      // scroll position to restore when going back to results
 
+  // ---- Map (bundled state outlines: no tile service or API key) ----
   if (window.L) {
     var css = getComputedStyle(document.documentElement);
     var accent = css.getPropertyValue("--accent").trim();
@@ -195,99 +196,114 @@
       }).bindPopup(function () {
         return "<b>" + esc(r.name) + "</b>" + esc(r.place) +
           "<br><b style='display:inline'>" + num(r.total) + "</b> reported sex offenses, " + span + " (" + num(r.rape) + " rape) · rank #" + r.rank +
-          (r.cases.length ? "<br>" + r.cases.length + " with public court/lawsuit records" : "") +
-          '<br><a href="#" data-show="' + r.i + '">Open school details ↓</a>';
+          (r.cases.length ? "<br>" + r.cases.length + " case" + (r.cases.length > 1 ? "s" : "") + " with public court/lawsuit records" : "") +
+          '<br><a href="#school-' + r.i + '">Open this school ↓</a>';
       }).addTo(map);
-    });
-    map.on("popupopen", function (e) {
-      var a = e.popup.getElement().querySelector("[data-show]");
-      if (a) a.addEventListener("click", function (ev) {
-        ev.preventDefault();
-        var r = rows[+a.getAttribute("data-show")];
-        setView("schools");
-        q.value = r.raw[0];
-        open["s" + r.i] = true;
-        shown = 50; render();
-        var tr = document.getElementById("row-" + r.i);
-        if (tr) tr.scrollIntoView({ behavior: "smooth", block: "start" });
-      });
     });
   } else {
     document.getElementById("map").innerHTML = '<p style="padding:16px">Map could not load. The full list is below.</p>';
   }
 
-  // ---- Table: universities view and all-cases view ----
+  // ---- Search results: universities, matched by name, place or case details ----
   function matches(text, term) { return text.toLowerCase().indexOf(term) !== -1; }
+  function caseText(k) { return [k.school, k.title, k.summary, k.status, k.type, (k.tracks || []).map(function (t) { return t.short + " " + t.note; }).join(" ")].join(" "); }
 
-  function renderSchools(term) {
+  function renderList() {
+    var term = q.value.trim().toLowerCase();
     var list = !term ? ranked : ranked.filter(function (r) {
       return matches(r.name + " " + r.place, term) || r.state.toLowerCase() === term ||
-        r.cases.some(function (k) { return matches(k.school + " " + k.title, term); });
+        r.cases.some(function (k) { return matches(caseText(k), term); });
     });
     var head = '<thead><tr><th class="n">#</th><th>University</th>' +
       years.map(function (y) { return '<th class="n opt">' + y + "</th>"; }).join("") +
-      '<th class="n">Total reports</th><th class="n">Rape</th></tr></thead>';
+      '<th class="n">Reports</th><th class="n">Rape</th></tr></thead>';
     var cols = 4 + years.length;
     var body = list.slice(0, shown).map(function (r) {
-      var isOpen = !!open["s" + r.i];
       var chips = r.cases.map(function (k) {
         var t = (k.tracks || []).filter(function (x) { return x.state === "active"; })[0] || (k.tracks || [])[0];
         return t ? stageChip(t) : "";
       }).join(" ");
-      var tr = '<tr id="row-' + r.i + '" class="click' + (isOpen ? " open" : "") + '" data-open="s' + r.i + '" tabindex="0" aria-expanded="' + isOpen + '">' +
+      return '<tr class="click" data-school="' + r.i + '" tabindex="0">' +
         '<td class="n muted">' + r.rank + "</td>" +
-        '<td><div class="school"><span class="caret">' + (isOpen ? "▾" : "▸") + "</span> " + esc(r.name) + "</div>" +
-        '<div class="muted small">' + esc(r.place) + " · " + num(r.total) + " reports" + (r.cases.length ? ", " + r.cases.length + " with public court/lawsuit records" : "") + "</div>" +
+        '<td><div class="school">' + esc(r.name) + ' <span class="go">›</span></div>' +
+        '<div class="muted small">' + esc(r.place) + (r.cases.length ? " · " + r.cases.length + " case" + (r.cases.length > 1 ? "s" : "") + " with court/lawsuit records" : "") + "</div>" +
         (chips ? '<div class="chips">' + chips + "</div>" : "") + "</td>" +
         r.perYear.map(function (v) { return '<td class="n opt">' + num(v[0] + v[1] + v[2]) + "</td>"; }).join("") +
         '<td class="n"><b>' + num(r.total) + '</b></td><td class="n">' + num(r.rape) + "</td></tr>";
-      if (isOpen) tr += '<tr class="detail"><td colspan="' + cols + '">' + schoolDetailHTML(r) + "</td></tr>";
-      return tr;
     }).join("");
     document.getElementById("rank").innerHTML = head + "<tbody>" + (body || '<tr><td colspan="' + cols + '" class="muted">No university matches “' + esc(term) +
       "”. Schools not listed reported zero sex offenses in " + span + ".</td></tr>") + "</tbody>";
     var sum = list.reduce(function (a, r) { return a + r.total; }, 0);
+    var withCases = list.filter(function (r) { return r.cases.length; }).length;
     document.getElementById("count").textContent = num(sum) + " reported sex offenses at " + num(list.length) + (term ? " matching" : "") +
-      " universities, " + span + ", ranked by number of reports. Click a university for its full record.";
+      " universities, " + span + ", ranked by number of reports" + (withCases ? " · " + withCases + " with public court/lawsuit records" : "") +
+      ". Click a university to see all its reports and cases.";
     document.getElementById("more").hidden = list.length <= shown;
-  }
-
-  var casesSorted = CASES.slice().sort(function (a, b) { return b.reported - a.reported || b.year - a.year; });
-  function renderCases(term) {
-    var list = !term ? casesSorted : casesSorted.filter(function (k) {
-      return matches([k.school, k.city, k.state, k.title, k.summary, k.status, k.type].join(" "), term) || k.state.toLowerCase() === term;
-    });
-    var head = '<thead><tr><th class="n">Year</th><th>University</th><th class="opt">Case</th><th class="opt">Where it is in the legal process</th></tr></thead>';
-    var body = list.map(function (k) {
-      var id = "c" + CASES.indexOf(k);
-      var isOpen = !!open[id];
-      var tr = '<tr class="click' + (isOpen ? " open" : "") + '" data-open="' + id + '" tabindex="0" aria-expanded="' + isOpen + '">' +
-        '<td class="n muted">' + esc(k.reported) + "</td>" +
-        '<td><div class="school"><span class="caret">' + (isOpen ? "▾" : "▸") + "</span> " + esc(k.school) + '</div><div class="muted small">' + esc(k.city) + ", " + esc(k.state) + "</div>" +
-        '<div class="mobile-only"><div class="small">' + esc(k.title) + '</div><div class="chips">' + (k.tracks || []).map(stageChip).join(" ") + "</div></div></td>" +
-        '<td class="case-title opt">' + esc(k.title) + "</td>" +
-        '<td class="opt"><div class="chips">' + (k.tracks || []).map(stageChip).join(" ") + "</div></td></tr>";
-      if (isOpen) tr += '<tr class="detail"><td colspan="4">' + caseHTML(k) + "</td></tr>";
-      return tr;
-    }).join("");
-    document.getElementById("rank").innerHTML = head + "<tbody>" + (body || '<tr><td colspan="4" class="muted">No case matches “' + esc(term) + "”.</td></tr>") + "</tbody>";
-    var live = list.filter(function (k) { return (k.tracks || []).some(function (t) { return t.state === "active"; }); }).length;
-    document.getElementById("count").textContent = num(list.length) + (term ? " matching" : "") + " reports that became public lawsuits, criminal cases or federal investigations, newest first (" + live +
-      " still active). All " + num(recentTotal) + " reports from " + span + " are counted under \u201cAll reports by university\u201d. Click a case for the full record.";
-    document.getElementById("more").hidden = true;
-  }
-
-  function render() {
-    var term = q.value.trim().toLowerCase();
-    document.getElementById("rank").className = "rank " + view;
-    if (view === "cases") renderCases(term); else renderSchools(term);
     renderNews(term);
   }
+
+  // ---- One school's page ----
+  function renderSchool(r) {
+    document.getElementById("school").innerHTML =
+      '<button type="button" class="back" id="back">← Back to results</button>' +
+      '<h2 class="school-h">' + esc(r.name) + "</h2>" +
+      '<p class="muted">' + esc(r.place) + " · Rank #" + r.rank + " of " + num(rows.length) + " by reported sex offenses, " + span + "</p>" +
+      '<div class="big">' +
+      "<div><b>" + num(r.total) + "</b><span>sex offenses reported, " + span + "</span></div>" +
+      "<div><b>" + num(r.rape) + "</b><span>rapes reported, " + span + "</span></div>" +
+      "<div><b>" + num(r.cases.length) + "</b><span>cases with public court, lawsuit or federal records</span></div></div>" +
+      schoolDetailHTML(r) +
+      '<button type="button" class="back" id="back2">← Back to results</button>';
+    document.getElementById("back").addEventListener("click", goBack);
+    document.getElementById("back2").addEventListener("click", goBack);
+  }
+
+  function show() {
+    var m = location.hash.match(/^#school-(\d+)$/);
+    var r = m ? rows[+m[1]] : null;
+    var listEls = ["controls", "process", "count", "results", "more", "news-section"];
+    if (r) {
+      if (!current) listScroll = window.scrollY;
+      current = r;
+      listEls.forEach(function (id) { document.getElementById(id).hidden = true; });
+      document.getElementById("school").hidden = false;
+      renderSchool(r);
+      document.getElementById("school").scrollIntoView({ block: "start" });
+    } else {
+      var wasSchool = !!current;
+      current = null;
+      document.getElementById("school").hidden = true;
+      listEls.forEach(function (id) { document.getElementById(id).hidden = false; });
+      renderList();
+      if (wasSchool) window.scrollTo(0, listScroll);
+    }
+  }
+  function goBack() {
+    // Return to the search results the user came from (browser history when possible).
+    if (history.state && history.state.fromList) history.back();
+    else { history.replaceState(null, "", location.pathname + location.search); show(); }
+  }
+  function openSchool(i) {
+    history.pushState({ fromList: true }, "", "#school-" + i);
+    show();
+  }
+  window.addEventListener("popstate", show);
+  window.addEventListener("hashchange", show);
+
+  var table = document.getElementById("rank");
+  table.addEventListener("click", function (e) {
+    var tr = e.target.closest("[data-school]");
+    if (tr && !e.target.closest("a")) openSchool(+tr.getAttribute("data-school"));
+  });
+  table.addEventListener("keydown", function (e) {
+    var tr = e.target.closest("[data-school]");
+    if (tr && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); openSchool(+tr.getAttribute("data-school")); }
+  });
 
   // ---- Latest news (refreshed every 6 hours by a GitHub Action) ----
   var newsShown = 15;
   function renderNews(term) {
-    if (!NEWS) { document.querySelector(".news").hidden = true; return; }
+    if (!NEWS) { document.getElementById("news-section").hidden = true; return; }
     var list = !term ? NEWS.items : NEWS.items.filter(function (n) { return matches(n.t + " " + n.s, term); });
     document.getElementById("news").innerHTML = list.slice(0, newsShown).map(function (n) {
       return '<li><a href="' + esc(n.u) + '" target="_blank" rel="noopener">' + esc(n.t) + '</a><div class="muted small">' + esc(n.s) + " · " + fmtDate(n.d) + "</div></li>";
@@ -297,41 +313,8 @@
     document.getElementById("news-more").hidden = list.length <= newsShown;
   }
 
-  function setView(v) {
-    view = v;
-    document.querySelectorAll("[data-view]").forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-view") === v); });
-  }
-  document.querySelectorAll("[data-view]").forEach(function (b) {
-    b.addEventListener("click", function () { setView(b.getAttribute("data-view")); shown = 50; render(); });
-  });
-  document.querySelector('[data-view="schools"]').textContent = "All reports by university (" + num(recentTotal) + ")";
-  document.querySelector('[data-view="cases"]').textContent = "Court & lawsuit records (" + CASES.length + ")";
-
-  function toggleRow(e) {
-    if (e.target.closest("a")) return;
-    var tr = e.target.closest("[data-open]");
-    if (!tr) return;
-    var id = tr.getAttribute("data-open");
-    open[id] = !open[id];
-    render();
-  }
-  var table = document.getElementById("rank");
-  table.addEventListener("click", toggleRow);
-  table.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleRow(e); } });
-
-  q.addEventListener("input", function () {
-    shown = 50; newsShown = 15;
-    render();
-    // Auto-open the top result when a search narrows to a handful of universities.
-    var term = q.value.trim().toLowerCase();
-    if (view === "schools" && term.length > 2) {
-      var hits = ranked.filter(function (r) { return matches(r.name + " " + r.place, term) || r.cases.some(function (k) { return matches(k.school, term); }); });
-      if (hits.length && hits.length <= 5 && !open["s" + hits[0].i]) {
-        open["s" + hits[0].i] = true; render();
-      }
-    }
-  });
-  document.getElementById("more").addEventListener("click", function () { shown += 100; render(); });
+  q.addEventListener("input", function () { shown = 50; newsShown = 15; renderList(); });
+  document.getElementById("more").addEventListener("click", function () { shown += 100; renderList(); });
   document.getElementById("news-more").addEventListener("click", function () { newsShown += 20; renderNews(q.value.trim().toLowerCase()); });
-  render();
+  show();
 })();
