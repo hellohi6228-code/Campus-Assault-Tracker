@@ -22,6 +22,13 @@
   // ---- Universities: one row per campus in the federal data ----
   var years = CLERY.recentYears;
   var span = years.length ? years[0] + "–" + years[years.length - 1] : "";
+  // Schools report a year's counts the following fall and the government publishes them after that, so the
+  // federal figures always trail; cases, news and crime logs on this site are current.
+  // National total includes the few campuses the federal directory gives no location for (not on the map).
+  var nationalTotal = years.reduce(function (a, y) { var n = CLERY.national[y]; return a + n.rape + n.fondling + n.incest + n.statutory; }, 0);
+  var lastYear = years[years.length - 1], thisYear = new Date().getFullYear();
+  var pendingNote = lastYear < thisYear ? " Federal figures for " + (lastYear + 1) + (thisYear > lastYear + 1 ? "–" + thisYear : "") +
+    " are not published yet; cases, news and crime-log reports below run through " + thisYear + "." : "";
   var nameCount = {};
   CLERY.campuses.forEach(function (c) { nameCount[c[0]] = (nameCount[c[0]] || 0) + 1; });
 
@@ -291,8 +298,9 @@
     }).join("");
     document.getElementById("rank").innerHTML = head + "<tbody>" + (body || '<tr><td colspan="4" class="muted">No university matches “' + esc(term) + "”.</td></tr>") + "</tbody>";
     var reports = list.reduce(function (a, r) { return a + r.total; }, 0);
-    document.getElementById("count").textContent = num(reports) + " sex offenses reported to the federal government at " + num(list.length) +
-      (term ? " matching" : "") + " universities (" + span + ").";
+    document.getElementById("count").textContent = term
+      ? num(reports) + " sex offenses reported to the federal government at " + num(list.length) + " matching universities (" + span + ")."
+      : num(nationalTotal) + " sex offenses reported to the federal government by US colleges (" + span + ")." + pendingNote;
     document.getElementById("more").hidden = list.length <= shown;
     renderNews(term);
   }
@@ -308,7 +316,7 @@
       '<p class="fed-top"><b>' + num(r.total) + "</b> sex offenses reported, " + span + " (" + num(r.rape) +
       ' rape). Schools report these to the government only as counts, with no names, dates or details.</p>' +
       '<p class="muted small">By year: ' + years.map(function (y, i) { var v = r.perYear[i]; return y + ": " + num(v[0] + v[1] + v[2]); }).join(" · ") +
-      ". 2025 figures are expected from the Department of Education in 2027. A 0 can also mean the school filed no report that year.</p>" +
+      ". " + (lastYear + 1) + " figures are not published by the Department of Education yet. A 0 can also mean the school filed no report that year.</p>" +
       '<h4 id="case-count">Cases and news reports (' + num(r.count) + ")</h4>" +
       '<p class="legend small">' + badge("t-crim", "Criminal") + " " + badge("t-civ", "Civil") + " " + badge("t-sch", "School") + " " + badge("t-fed", "Federal") + " " + badge("t-news", "News") +
       ' <span class="muted">Tap a case for details.</span></p>' +
