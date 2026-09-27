@@ -137,3 +137,10 @@ table.yrs { border-collapse: collapse; font-size: .88rem; margin: 4px 0; }
 .school-page h4 { margin: 20px 0 6px; font-size: 1rem; }
 .school-page .case { border-top: 1px solid var(--border); padding-top: 12px; margin-top: 12px; max-width: none; }
 [hidden] { display: none !important; }
+
+.log details { border-top: 1px solid var(--border); padding: 8px 0; }
+.log summary { cursor: pointer; font-weight: 600; list-style-position: outside; }
+.log .log-date { color: var(--muted); font-weight: 400; font-variant-numeric: tabular-nums; margin-right: 6px; }
+.log dl { display: grid; grid-template-columns: max-content 1fr; gap: 2px 12px; margin: 8px 0 4px 18px; font-size: .9rem; }
+.log dt { color: var(--muted); }
+.log dd { margin: 0; }

@@ -219,7 +219,9 @@
       '<h2 class="school-h">' + esc(r.name) + "</h2>" +
       '<p class="muted small">' + esc(r.place) + " · " + num(r.total) + " sex offenses reported, " + span + " (" + num(r.rape) + " rape)</p>" +
       (r.cases.length ? r.cases.map(caseHTML).join("") : '<p class="muted">No court or lawsuit records on file for this school yet.</p>') +
+      '<div id="school-log"></div>' +
       '<div id="school-news"></div>';
+    loadCrimeLog(r);
     loadSchoolNews(r);
     document.getElementById("back").addEventListener("click", goBack);
   }
@@ -245,6 +247,28 @@
     fetch("data/school-news/" + slug(r.raw[0]) + ".json", { cache: "no-cache" })
       .then(function (res) { return res.ok ? res.json() : []; })
       .then(paint, function () {});
+  }
+
+  // Individual reports from the school's Daily Crime Log (collected daily; see scripts/fetch_crime_logs.py).
+  function loadCrimeLog(r) {
+    fetch("data/crimelog/" + slug(r.raw[0]) + ".json", { cache: "no-cache" })
+      .then(function (res) { return res.ok ? res.json() : []; })
+      .then(function (rows) {
+        if (current !== r || !rows.length) return;
+        document.getElementById("school-log").innerHTML =
+          "<h4>Reports in the campus crime log (" + rows.length + ")</h4>" +
+          '<p class="muted small">From the school police Daily Crime Log, collected daily since Sept 2026. Logs show no names.</p>' +
+          '<div class="log">' + rows.map(function (e) {
+            return "<details><summary><span class=\"log-date\">" + esc((e.reported || "").split(" ")[0]) + "</span> " +
+              esc(e.nature || (e.offenses || []).join(", ")) + "</summary><dl>" +
+              "<dt>Offense</dt><dd>" + esc((e.offenses || []).join(", ")) + "</dd>" +
+              "<dt>Reported</dt><dd>" + esc(e.reported) + "</dd>" +
+              (e.occurred ? "<dt>Occurred</dt><dd>" + esc(e.occurred) + "</dd>" : "") +
+              "<dt>Location</dt><dd>" + esc(e.location) + "</dd>" +
+              "<dt>Status</dt><dd>" + esc(e.disposition || "Not stated") + "</dd>" +
+              "<dt>Incident #</dt><dd>" + esc(e.id) + "</dd></dl></details>";
+          }).join("") + "</div>";
+      }, function () {});
   }
 
   function show() {
