@@ -19,8 +19,9 @@ import xml.etree.ElementTree as ET
 
 OUT = "data/school-news"
 TERMS = '(rape OR "sexual assault" OR "sexual abuse" OR "sexual misconduct" OR "Title IX")'
-ABUSE = re.compile(r"\b(rape[ds]?|raping|sexual|sex abuse|sex assault|sexually|molest|Title IX|Clery|groping|fondl)", re.I)
-MAX_PER_SCHOOL = 40
+# Headlines must name sexual abuse itself; "Title IX" alone is often about sports equity.
+ABUSE = re.compile(r"\b(rape[ds]?|raping|rapist|sexual(?:ly)? (?:assault|abuse|misconduct|harass|battery|exploit|contact)|sex (?:abuse|assault|crime|offen)|molest|groping|groped|fondl|indecent)", re.I)
+MAX_PER_SCHOOL = 100
 # Headline shorthand used by the press for some schools.
 ALIASES = {
     "Louisiana State University and Agricultural & Mechanical College": ["LSU"],
