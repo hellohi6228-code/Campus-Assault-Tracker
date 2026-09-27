@@ -2,6 +2,7 @@ name: Fetch photos
 on:
   workflow_dispatch:
   push:
+    branches: [main]   # one writer for data/photos.js, so branch and main never conflict
     paths: [scripts/fetch_photos.py, data/cases.js, data/official-photos.json, .github/workflows/fetch-photos.yml]
 permissions:
   contents: write
