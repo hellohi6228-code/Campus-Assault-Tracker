@@ -17,6 +17,8 @@ import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
 
+from cluster_news import attach_to_cases, cluster, flatten, load_cases, set_common
+
 OUT = "data/school-news"
 TERMS = '(rape OR "sexual assault" OR "sexual abuse" OR "sexual misconduct" OR "Title IX")'
 # Headlines must name sexual abuse itself; "Title IX" alone is often about sports equity.
@@ -94,7 +96,15 @@ def load_institutions():
     return sorted(totals, key=lambda n: -totals[n])
 
 
+CASES = {}
+
+
 def main():
+    global CASES
+    CASES = load_cases()
+    # Word frequencies from the existing archive decide which words are too common to match a case.
+    set_common(x["t"] for f in (os.listdir(OUT) if os.path.isdir(OUT) else []) if f.endswith(".json") and f != "index.json"
+               for x in flatten(json.load(open(os.path.join(OUT, f)))))
     ap = argparse.ArgumentParser()
     ap.add_argument("--limit", type=int, default=0, help="only the N institutions with the most reports")
     args = ap.parse_args()
@@ -133,12 +143,17 @@ def main():
             failed += 1
             print(f"[{n}/{len(insts)}] {inst}: failed ({e})", file=sys.stderr)
             continue
+        # Merge with this school's earlier archive so older stories are kept, then group same-incident headlines.
+        path = os.path.join(OUT, slug(inst) + ".json")
+        if os.path.exists(path):
+            known = {re.sub(r"[^a-z0-9]", "", x["t"].lower())[:80] for x in items}
+            items += [x for x in flatten(json.load(open(path))) if re.sub(r"[^a-z0-9]", "", x["t"].lower())[:80] not in known]
         items.sort(key=lambda x: -x["d"])
-        items = items[:MAX_PER_SCHOOL]
+        items = attach_to_cases(cluster(items[:MAX_PER_SCHOOL], inst), CASES.get(inst, []), inst)
         ok += 1
         total_items += len(items)
         if items:
-            index[inst] = len(items)
+            index[inst] = len([x for x in items if "case" not in x])
             with open(os.path.join(OUT, slug(inst) + ".json"), "w") as f:
                 json.dump(items, f, ensure_ascii=False, separators=(",", ":"))
         if n % 50 == 0:

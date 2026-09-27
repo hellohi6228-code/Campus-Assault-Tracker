@@ -165,7 +165,7 @@
       (k.namingNote ? '<p class="muted small">' + esc(k.namingNote) + "</p>" : "") +
       '<p class="src">Sources: ' + k.sources.map(function (s) {
         return '<a href="' + esc(s.url) + '" target="_blank" rel="noopener">' + esc(s.label) + "</a>";
-      }).join(" · ") + "</p></div></details>";
+      }).join(" · ") + '</p><div class="case-news" id="cn-' + esc(k.id) + '"></div></div></details>';
   }
   function logItem(e) {
     var word = (e.disposition || "Reported").split(/[\s\/,-]+/)[0];
@@ -284,10 +284,15 @@
 
   // News coverage for one school: the archive file built weekly for every school, plus this week's feed.
   function newsItem(n) {
+    var all = [n].concat(n.more || []);
+    var outlets = all.map(function (a) {
+      return '<li><a href="' + esc(a.u) + '" target="_blank" rel="noopener">' + esc(a.t) + '</a> <span class="muted small">' + esc(a.s) + " · " + fmtDate(a.d) + "</span></li>";
+    }).join("");
     return '<details class="item"><summary>' + badge("t-news", "News") + ' <span class="it-title">' + esc(n.t) +
+      (all.length > 1 ? ' <span class="muted small">· ' + all.length + " articles</span>" : "") +
       '</span> <span class="muted small">' + fmtDate(n.d) + "</span></summary>" +
-      '<div class="it-body"><p>' + esc(n.s) + " · " + fmtDate(n.d) + '</p><p><a href="' + esc(n.u) +
-      '" target="_blank" rel="noopener">Read the article ↗</a></p><p class="muted small">Headline as published by the outlet. Allegations are unproven unless a court has ruled.</p></div></details>';
+      '<div class="it-body"><p class="muted small">' + (all.length > 1 ? all.length + " outlets covered this story:" : "Covered by:") + '</p><ul class="mini-news">' + outlets +
+      '</ul><p class="muted small">Headlines as published by each outlet. Allegations are unproven unless a court has ruled.</p></div></details>';
   }
   // News stories for one school, from the weekly archive (scripts/fetch_school_news.py).
   function loadSchoolNews(r, token) {
@@ -297,7 +302,16 @@
       .then(function (items) {
         if (current !== r || token !== renderToken || !items.length) return;
         items.sort(function (a, b) { return b.d - a.d; });
-        document.getElementById("items").insertAdjacentHTML("beforeend", items.map(newsItem).join(""));
+        // Stories about a documented case go inside that case; the rest are rows of their own.
+        items.filter(function (n) { return n.case; }).forEach(function (n) {
+          var box = document.getElementById("cn-" + n.case);
+          if (!box) return;
+          if (!box.innerHTML) box.innerHTML = "<p><b>News coverage</b></p><ul class=\"mini-news\"></ul>";
+          box.querySelector("ul").insertAdjacentHTML("beforeend", [n].concat(n.more || []).map(function (a) {
+            return '<li><a href="' + esc(a.u) + '" target="_blank" rel="noopener">' + esc(a.t) + '</a> <span class="muted small">' + esc(a.s) + " · " + fmtDate(a.d) + "</span></li>";
+          }).join(""));
+        });
+        document.getElementById("items").insertAdjacentHTML("beforeend", items.filter(function (n) { return !n.case; }).map(newsItem).join(""));
         updateCount(r);
       }, function () {});
   }

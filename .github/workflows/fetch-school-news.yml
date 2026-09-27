@@ -7,8 +7,6 @@ on:
         default: "0"
   schedule:
     - cron: "23 7 * * 0"   # weekly, Sunday
-  push:
-    paths: [scripts/fetch_school_news.py, .github/workflows/fetch-school-news.yml]
 permissions:
   contents: write
 concurrency: { group: data-commit, cancel-in-progress: false }
