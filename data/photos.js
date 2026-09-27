@@ -18,6 +18,12 @@ window.PHOTOS = {
   "page": "https://commons.wikimedia.org/wiki/File:Larry_Nassar_2018_Voice_of_America.png",
   "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3b/Larry_Nassar_2018_Voice_of_America.png/250px-Larry_Nassar_2018_Voice_of_America.png"
  },
+ "Richard Chan": {
+  "credit": "梁柏堅（表弟） Pakkin Leung",
+  "license": "CC BY 4.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Richard_Chan_arrested_inside_Victoria_Park_20191102.jpg",
+  "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/13/Richard_Chan_arrested_inside_Victoria_Park_20191102.jpg/250px-Richard_Chan_arrested_inside_Victoria_Park_20191102.jpg"
+ },
  "Robert Hadden": {
   "credit": "US Federal Government",
   "license": "Public domain",
