@@ -208,7 +208,25 @@
     document.getElementById("more").hidden = list.length <= shown;
   }
 
-  q.addEventListener("input", function () { shown = 50; render(); });
+  // ---- News feed (data/news.js, refreshed every 6 hours by a GitHub Action) ----
+  var NEWS = window.NEWS || null;
+  var newsShown = 15;
+  function renderNews() {
+    var ul = document.getElementById("news");
+    if (!NEWS) { document.querySelector(".news").hidden = true; return; }
+    var term = q.value.trim().toLowerCase();
+    var list = !term ? NEWS.items : NEWS.items.filter(function (n) { return (n.t + " " + n.s).toLowerCase().indexOf(term) !== -1; });
+    ul.innerHTML = list.slice(0, newsShown).map(function (n) {
+      var d = new Date(n.d * 1000).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+      return '<li><a href="' + esc(n.u) + '" target="_blank" rel="noopener">' + esc(n.t) + '</a><div class="muted small">' + esc(n.s) + " · " + d + "</div></li>";
+    }).join("") || '<li class="muted">No recent news matches “' + esc(term) + "”.</li>";
+    document.getElementById("news-meta").textContent = "Headlines as published by each outlet; allegations in them are unproven unless a court has ruled. Updated " +
+      new Date(NEWS.updated * 1000).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) + ".";
+    document.getElementById("news-more").hidden = list.length <= newsShown;
+  }
+  document.getElementById("news-more").addEventListener("click", function () { newsShown += 20; renderNews(); });
+
+  q.addEventListener("input", function () { shown = 50; newsShown = 15; render(); renderNews(); });
   document.getElementById("more").addEventListener("click", function () { shown += 100; render(); });
   document.getElementById("rank").addEventListener("click", function (e) {
     var b = e.target.closest("[data-toggle]");
@@ -224,4 +242,5 @@
     });
   });
   render();
+  renderNews();
 })();
