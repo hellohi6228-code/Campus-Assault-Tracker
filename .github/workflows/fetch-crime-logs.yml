@@ -7,7 +7,7 @@ on:
     paths: [scripts/fetch_crime_logs.py, .github/workflows/fetch-crime-logs.yml]
 permissions:
   contents: write
-concurrency: { group: data-commit, cancel-in-progress: false }
+concurrency: { group: crime-logs, cancel-in-progress: false }
 jobs:
   crime-logs:
     runs-on: ubuntu-latest
