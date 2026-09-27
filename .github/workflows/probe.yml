@@ -1,0 +1,19 @@
+name: probe-clery
+on:
+  push:
+    branches: [claude/campus-rape-cases-database-eqvpw9]
+    paths: [.github/workflows/probe.yml]
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          set -x
+          UA="Mozilla/5.0"
+          curl -sSL -A "$UA" https://ope.ed.gov/campussafety/ -o home.html; wc -c home.html; grep -oE '(src|href)="[^"]+"' home.html | head -40
+          for js in $(grep -oE 'src="[^"]+\.js[^"]*"' home.html | sed 's/src="//;s/"$//'); do
+            case $js in http*) u=$js;; /*) u=https://ope.ed.gov$js;; *) u=https://ope.ed.gov/campussafety/$js;; esac
+            curl -sSL -A "$UA" "$u" -o f.js; echo "== $u $(wc -c < f.js)"
+            grep -oE '"[^"]*(api|dataFile|DataFile|download|Download|\.zip|\.xls)[^"]*"' f.js | sort -u | head -60
+          done
+          curl -sSL -A "$UA" -o /dev/null -w '%{http_code}\n' "https://nces.ed.gov/ipeds/datacenter/data/HD2023.zip"
