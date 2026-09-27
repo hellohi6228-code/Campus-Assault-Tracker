@@ -271,6 +271,8 @@
       '<p class="muted small">' + esc(r.place) + "</p>" +
       '<p class="fed-top"><b>' + num(r.total) + "</b> sex offenses reported, " + span + " (" + num(r.rape) +
       ' rape). Schools report these to the government only as counts, with no names, dates or details.</p>' +
+      '<p class="muted small">By year: ' + years.map(function (y, i) { var v = r.perYear[i]; return y + ": " + num(v[0] + v[1] + v[2]); }).join(" · ") +
+      ". 2025 figures are expected from the Department of Education in 2027. A 0 can also mean the school filed no report that year.</p>" +
       '<h4 id="case-count">Cases and news reports (' + num(r.count) + ")</h4>" +
       '<p class="legend small">' + badge("t-crim", "Criminal") + " " + badge("t-civ", "Civil") + " " + badge("t-sch", "School") + " " + badge("t-fed", "Federal") + " " + badge("t-news", "News") +
       ' <span class="muted">Tap a case for details.</span></p>' +

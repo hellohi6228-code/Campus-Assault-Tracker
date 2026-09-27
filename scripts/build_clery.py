@@ -19,8 +19,9 @@ from collections import defaultdict
 import pandas as pd
 
 API = "https://ope.ed.gov/campussafety/api/dataFiles/file?fileName="
-# Each release covers three calendar years; together these span 2016-2024.
-RELEASES = ["Crime2019EXCEL.zip", "Crime2022EXCEL.zip", "Crime2025EXCEL.zip"]
+# Each release covers three calendar years. "Rape"/"fondling" categories exist from 2014 on (earlier years
+# used "forcible sex offenses" and are not comparable), so 2014-2024 is the full comparable history.
+RELEASES = ["Crime2016EXCEL.zip", "Crime2019EXCEL.zip", "Crime2022EXCEL.zip", "Crime2025EXCEL.zip"]
 GEOS = ["oncampuscrime", "noncampuscrime", "publicpropertycrime"]
 OFFENSES = ["RAPE", "FONDL", "INCES", "STATR"]
 IPEDS_DIRS = ["HD2024", "HD2023", "HD2022"]
@@ -97,11 +98,31 @@ def main():
 
     national = {y: [0, 0, 0, 0] for y in years}
     by_state = defaultdict(lambda: {y: 0 for y in years})
-    recent = years[-3:]
+    recent = years  # every year is stored per campus (the site shows all-time totals)
+    # Campus IDs and branch names change between releases, so combine records with the same institution
+    # name and city; use any coordinates known for that institution when a record's own ID has none.
+    by_name_coords = {}
+    for uid, info in campuses.items():
+        ll = coords.get(uid // 1000)
+        if ll:
+            by_name_coords.setdefault(info["name"], ll)
+    merged, merged_info = {}, {}
+    for uid, info in sorted(campuses.items()):
+        key = (info["name"], info["city"].lower())
+        tgt = merged.setdefault(key, defaultdict(lambda: [0, 0, 0, 0]))
+        for y, v in counts.get(uid, {}).items():
+            for i in range(4):
+                tgt[y][i] += v[i]
+        prev = merged_info.get(key)
+        # Keep the branch label of the record with the most reports.
+        if not prev or sum(sum(v) for v in counts.get(uid, {}).values()) > prev[1]:
+            merged_info[key] = (dict(info, uid=uid), sum(sum(v) for v in counts.get(uid, {}).values()))
+
     out_campuses = []
     missing = 0
-    for uid, info in campuses.items():
-        per_year = counts.get(uid, {})
+    for key, per_year in merged.items():
+        info = merged_info[key][0]
+        uid = info["uid"]
         for y in years:
             v = per_year.get(y, [0, 0, 0, 0])
             for i in range(4):
@@ -110,7 +131,7 @@ def main():
         recent_vals = [per_year.get(y, [0, 0, 0, 0]) for y in recent]
         if not any(sum(v) for v in recent_vals):
             continue
-        ll = coords.get(uid // 1000)
+        ll = coords.get(uid // 1000) or by_name_coords.get(info["name"])
         if not ll:
             missing += 1
             continue
