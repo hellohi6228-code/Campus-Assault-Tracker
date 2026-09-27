@@ -45,7 +45,7 @@ def slug(name):
 
 
 FAMOUS_SHORT = {"Cornell", "Yale", "Stanford", "Harvard", "Duke", "Baylor", "Vanderbilt", "Dartmouth", "Princeton",
-                "Northwestern", "Georgetown", "Brown", "Clemson", "Purdue", "Rutgers", "Tulane", "Emory", "Syracuse"}
+                "Northwestern", "Georgetown", "Clemson", "Purdue", "Rutgers", "Tulane", "Emory", "Syracuse"}
 
 
 _OWNERS = {}
@@ -91,6 +91,16 @@ def search_names(inst):
     return list(dict.fromkeys(names))
 
 
+def name_pattern(names):
+    """Full names match in any case; short names ("Ohio State", "Yale", "LSU") only as written, so
+    "Washington state man" or "Brown County" don't count as the school."""
+    full = [n for n in names if len(n.split()) > 2 or "University" in n or "College" in n]
+    short = [n for n in names if n not in full]
+    parts = ["(?i:%s)" % "|".join(re.escape(n) for n in full)] if full else []
+    parts += [r"\b%s\b" % re.escape(n) for n in short]
+    return re.compile("|".join(parts))
+
+
 def fetch(query):
     url = "https://news.google.com/rss/search?" + urllib.parse.urlencode({"q": query, "hl": "en-US", "gl": "US", "ceid": "US:en"})
     req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (campus-assault-tracker school news build)"})
@@ -133,7 +143,7 @@ def main():
     index = {}
     for n, inst in enumerate(insts, 1):
         names = search_names(inst)
-        name_re = re.compile("|".join(re.escape(x) for x in names), re.I)
+        name_re = name_pattern(names)
         items, seen = [], set()
         try:
             for nm in names[:2]:
