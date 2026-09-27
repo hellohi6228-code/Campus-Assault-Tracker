@@ -49,8 +49,10 @@ def load_coords():
             print(f"IPEDS {d}: {e}", file=sys.stderr)
             continue
         csv = next(n for n in zf.namelist() if n.lower().endswith(".csv"))
-        hd = pd.read_csv(io.BytesIO(zf.read(csv)), encoding="latin1", usecols=lambda c: c.upper() in ("UNITID", "LATITUDE", "LONGITUD"))
-        hd.columns = [c.upper() for c in hd.columns]
+        hd = pd.read_csv(io.BytesIO(zf.read(csv)), encoding="latin1", low_memory=False)
+        # Strip byte-order marks / stray characters from header names (e.g. "\xef\xbb\xbfUNITID").
+        hd.columns = [re.sub(r"[^A-Z0-9_]", "", str(c).upper()) for c in hd.columns]
+        hd = hd[["UNITID", "LATITUDE", "LONGITUD"]]
         print(f"IPEDS {d}: {len(hd)} institutions", file=sys.stderr)
         return {int(r.UNITID): (round(float(r.LATITUDE), 4), round(float(r.LONGITUD), 4))
                 for r in hd.itertuples() if pd.notna(r.LATITUDE) and pd.notna(r.LONGITUD)}

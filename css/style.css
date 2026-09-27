@@ -100,3 +100,22 @@ h2 { margin: 0; font-size: 1.25rem; }
 .policy ul { padding-left: 20px; margin: 10px 0 0; }
 .policy li { margin: 6px 0; }
 .footer { color: var(--muted); font-size: .85rem; padding-bottom: 40px; }
+
+.ranking .sub { color: var(--muted); font-size: .82rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.trend svg { width: 100%; height: auto; display: block; }
+.trend .bar-rape { fill: var(--accent); }
+.trend .bar-other { fill: var(--accent); opacity: .4; }
+.trend .bar-lbl, .trend .bar-yr { fill: var(--muted); font-size: 12px; text-anchor: middle; font-variant-numeric: tabular-nums; }
+.trend .bar-lbl { fill: var(--text); font-weight: 600; }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: .85rem; color: var(--muted); margin-top: 6px; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; background: var(--accent); }
+.legend i.bar-other { opacity: .4; }
+
+.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+table.schools { width: 100%; border-collapse: collapse; font-size: .9rem; }
+.schools th, .schools td { padding: 7px 8px; border-bottom: 1px solid var(--border); text-align: left; }
+.schools th { color: var(--muted); font-weight: 600; font-size: .8rem; white-space: nowrap; }
+.schools td.n, .schools th.n { text-align: right; font-variant-numeric: tabular-nums; }
+.schools td:first-child { min-width: 180px; }
+.more { margin-top: 10px; font: inherit; padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); cursor: pointer; }
