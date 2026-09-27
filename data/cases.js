@@ -53,7 +53,7 @@ window.CASES = [
     tracks: [{"track": "criminal", "step": 6, "state": "closed", "note": "Convicted March 2016. Appeal denied August 2018. Sentence served; lifetime sex-offender registration.", "short": "Convicted; appeal denied"}],
     statusCategory: "conviction",
     affected: 1, payout: 0,
-    named: [{ name: "Brock Turner", basis: "Convicted of three felony counts, March 2016" }],
+    named: [{ name: "Brock Turner", basis: "Convicted of three felony counts, March 2016" , photo: "https://en.wikipedia.org/wiki/People_v._Turner"}],
     sources: [
       { label: "Stanford Daily", url: "https://stanforddaily.com/2016/03/30/brock-turner-found-guilty-on-three-felony-counts/" },
       { label: "CNN", url: "https://www.cnn.com/2016/06/06/us/sexual-assault-brock-turner-stanford/" },
@@ -73,7 +73,7 @@ window.CASES = [
     tracks: [{"track": "criminal", "step": 6, "state": "closed", "note": "Pleaded guilty 2017. Michigan Supreme Court denied his final sentencing appeal in June 2022.", "short": "Guilty plea; appeals exhausted"}, {"track": "civil", "step": 4, "state": "closed", "note": "$500M settlement (2018).", "short": "Settled ($500M)"}, {"track": "federal", "step": 3, "state": "closed", "note": "Title IX violations found; record $4.5M Clery fine (2019).", "short": "Fined $4.5M"}],
     statusCategory: "conviction",
     affected: 333, payout: 504500000,
-    named: [{ name: "Larry Nassar", basis: "Convicted on federal and state charges, 2017–2018" }],
+    named: [{ name: "Larry Nassar", basis: "Convicted on federal and state charges, 2017–2018" , photo: "https://en.wikipedia.org/wiki/Larry_Nassar"}],
     sources: [
       { label: "Inside Higher Ed — $4.5M fine", url: "https://www.insidehighered.com/news/2019/09/06/education-department-fines-michigan-state-45-million-not-reporting-nassar-crimes" },
       { label: "TIME", url: "https://time.com/5669880/michigan-state-university-larry-nassar-fine/" },
@@ -113,7 +113,7 @@ window.CASES = [
     tracks: [{"track": "criminal", "step": 6, "state": "closed", "note": "Convicted January 2023. 20-year sentence affirmed on appeal.", "short": "Convicted; sentence upheld"}, {"track": "civil", "step": 4, "state": "closed", "note": "More than $1B in settlements; the largest ($750M, 576 patients) was approved in 2025.", "short": "Settled (>$1B)"}],
     statusCategory: "conviction",
     affected: 802, payout: 986500000,
-    named: [{ name: "Robert Hadden", basis: "Convicted in federal court, 2023; sentenced to 20 years" }],
+    named: [{ name: "Robert Hadden", basis: "Convicted in federal court, 2023; sentenced to 20 years" , photo: "https://www.propublica.org/article/columbia-university-750-million-settlement-robert-hadden-sexual-assault"}],
     sources: [
       { label: "ProPublica", url: "https://www.propublica.org/article/columbia-university-750-million-settlement-robert-hadden-sexual-assault" },
       { label: "NBC News", url: "https://www.nbcnews.com/news/us-news/columbia-new-york-presbyterian-hospital-settle-hundreds-sex-abuse-clai-rcna205335" },
@@ -134,7 +134,7 @@ window.CASES = [
     tracks: [{"track": "criminal", "step": 5, "state": "closed", "note": "Original conviction overturned in 2026. He then pleaded guilty to 13 felonies (April 2026) and was sentenced to 11 years.", "short": "Pleaded guilty; 11 years"}, {"track": "civil", "step": 4, "state": "closed", "note": "About $700M in settlements (2021–2022).", "short": "Settled (~$700M)"}],
     statusCategory: "conviction",
     affected: 6000, payout: 690600000,
-    named: [{ name: "James Heaps", basis: "Pleaded guilty to 13 felonies, April 2026" }],
+    named: [{ name: "James Heaps", basis: "Pleaded guilty to 13 felonies, April 2026" , photo: "https://abc7.com/post/ex-ucla-campus-gynecologist-james-mason-heaps-pleads-guilty-13-sex-crimes-resentenced-11-years-prison/18885744/"}],
     sources: [
       { label: "CNN (2026)", url: "https://www.cnn.com/2026/04/14/us/james-heaps-ucla-gynecologist" },
       { label: "ABC7 Los Angeles", url: "https://abc7.com/post/ex-ucla-campus-gynecologist-james-mason-heaps-pleads-guilty-13-sex-crimes-resentenced-11-years-prison/18885744/" }
@@ -193,7 +193,7 @@ window.CASES = [
     tracks: [{"track": "criminal", "step": 5, "state": "closed", "note": "One former player convicted 2014 and sentenced to 20 years.", "short": "One player convicted"}, {"track": "civil", "step": 4, "state": "closed", "note": "Title IX lawsuits settled; the last of the 2016 suits settled in 2023.", "short": "Settled"}, {"track": "federal", "step": 4, "state": "active", "note": "Education Dept. OCR found delays in Title IX cases (Jan 2025). Resolution agreement requires progress reports in 2025 and 2026.", "short": "Under federal monitoring"}],
     statusCategory: "conviction",
     affected: null, payout: 2005000,
-    named: [{ name: "Tevin Elliott", basis: "Convicted of two counts of sexual assault, January 2014; sentenced to 20 years" }],
+    named: [{ name: "Tevin Elliott", basis: "Convicted of two counts of sexual assault, January 2014; sentenced to 20 years" , photo: "https://en.wikipedia.org/wiki/Tevin_Elliot"}],
     sources: [
       { label: "ESPN (NCAA ruling)", url: "https://www.espn.com/college-sports/story/_/id/32003986/ncaa-not-punishing-baylor-sexual-assault-allegations" },
       { label: "Baylor Lariat (Elliott verdict)", url: "https://baylorlariat.com/2014/01/24/elliott-guilty-ex-football-player-to-serve-20-years-for-assault/" },
@@ -215,8 +215,8 @@ window.CASES = [
     statusCategory: "conviction",
     affected: 1, payout: 0,
     named: [
-      { name: "Brandon Vandenburg", basis: "Convicted of aggravated rape at retrial, 2016; sentenced to 17 years" },
-      { name: "Cory Batey", basis: "Convicted of aggravated rape at retrial, 2016; sentenced to 15 years" }
+      { name: "Brandon Vandenburg", basis: "Convicted of aggravated rape at retrial, 2016; sentenced to 17 years" , photo: "https://www.cnn.com/2016/06/18/us/vanderbilt-rape-case"},
+      { name: "Cory Batey", basis: "Convicted of aggravated rape at retrial, 2016; sentenced to 15 years" , photo: "https://www.espn.com/college-football/story/_/id/17083346/former-vanderbilt-commodores-player-cory-batey-sentenced-15-years-dorm-rape"}
     ],
     sources: [
       { label: "NBC News", url: "https://www.nbcnews.com/news/us-news/ex-vanderbilt-football-player-vandenburg-convicted-rape-retrial-n595086" },
@@ -238,7 +238,7 @@ window.CASES = [
     tracks: [{"track": "criminal", "step": 6, "state": "active", "note": "Convicted 2012 on 45 counts. Pennsylvania courts denied a new trial (2024). In Sept 2026 he withdrew his latest state bid to pursue a federal appeal.", "short": "Convicted; federal appeal pending"}, {"track": "federal", "step": 3, "state": "closed", "note": "$2.4M Clery Act fine (2016).", "short": "Fined $2.4M"}],
     statusCategory: "conviction",
     affected: 10, payout: 2397500,
-    named: [{ name: "Jerry Sandusky", basis: "Convicted of 45 counts of child sexual abuse, 2012" }],
+    named: [{ name: "Jerry Sandusky", basis: "Convicted of 45 counts of child sexual abuse, 2012" , photo: "https://en.wikipedia.org/wiki/Jerry_Sandusky"}],
     sources: [
       { label: "CNN", url: "https://www.cnn.com/2016/11/03/us/penn-state-fine-sandusky-case/index.html" },
       { label: "Inside Higher Ed", url: "https://www.insidehighered.com/news/2016/11/04/education-departments-historic-sanction-against-penn-state-clery-violations" },
@@ -278,7 +278,7 @@ window.CASES = [
     tracks: [{"track": "criminal", "step": 6, "state": "closed", "note": "Convicted of murder April 2008; verdict upheld on appeal (2010).", "short": "Convicted; verdict upheld"}, {"track": "civil", "step": 4, "state": "closed", "note": "$2.5M settlement with the family (2007).", "short": "Settled ($2.5M)"}, {"track": "federal", "step": 3, "state": "closed", "note": "Clery Act fine (2008).", "short": "Fined"}],
     statusCategory: "conviction",
     affected: 1, payout: 2857500,
-    named: [{ name: "Orange Taylor III", basis: "Convicted of the murder at retrial, April 2008" }],
+    named: [{ name: "Orange Taylor III", basis: "Convicted of the murder at retrial, April 2008" , photo: "https://localwiki.org/ann-arbor/Orange_Taylor_III"}],
     sources: [
       { label: "Campus Safety Magazine", url: "https://www.campussafetymagazine.com/news/eastern-michigan-university-agrees-to-pay-largest-ever-clery-act-fine-of-35/" },
       { label: "NBC News", url: "https://www.nbcnews.com/id/wbna19790500" },
@@ -969,7 +969,7 @@ window.CASES = [
     tracks: [{"track": "criminal", "step": 5, "state": "closed", "short": "Pleaded guilty; 3 years prison", "note": "Pleaded guilty to three counts of third-degree sexual assault, strangulation and stalking; sentenced to 3 years prison and 8 years probation."}],
     affected: 11,
     payout: 0,
-    named: [{"name": "Alec Cook", "basis": "Pleaded guilty to three counts of third-degree sexual assault; sentenced to 3 years in prison"}],
+    named: [{"name": "Alec Cook", "basis": "Pleaded guilty to three counts of third-degree sexual assault; sentenced to 3 years in prison", "photo": "https://madison.com/news/local/courts/former-uw-madison-student-alec-cook-sentenced-to-3-years-in-prison-for-sexual-assaults/article_ce35f483-b4ec-5f9d-b047-02ef3823eb16.html"}],
     sources: [{"label": "Wisconsin State Journal", "url": "https://madison.com/news/local/courts/article_ce35f483-b4ec-5f9d-b047-02ef3823eb16.html"}, {"label": "WISN", "url": "https://www.wisn.com/article/alec-cook-sentencing-uw-sexaual-assault/21752537"}, {"label": "Channel3000 (civil commitment)", "url": "https://www.channel3000.com/news/former-uw-student-ordered-civilly-committed-in-minnesota-as-sexually-dangerous-person/article_9b91cccc-3ad7-11ee-8ae4-6f308751d75f.html"}]
   },
   {
@@ -1120,7 +1120,7 @@ window.CASES = [
     tracks: [{"track": "criminal", "step": 5, "state": "closed", "short": "Convicted; 8 years", "note": "Jury convicted him of first-degree rape and second-degree burglary (Nov 24, 2025); sentenced to 8 years, concurrent (Feb 2026)."}],
     affected: 1,
     payout: 0,
-    named: [{"name": "Bilguun Enkhbayar", "basis": "Convicted of first-degree rape and second-degree burglary, Nov 2025; sentenced to 8 years"}],
+    named: [{"name": "Bilguun Enkhbayar", "basis": "Convicted of first-degree rape and second-degree burglary, Nov 2025; sentenced to 8 years", "photo": "https://www.14850.com/112543785-rape-burglary-conviction-2511/"}],
     sources: [{"label": "Cornell Daily Sun (conviction)", "url": "https://www.cornellsun.com/article/2025/12/former-cornell-student-convicted-of-rape-over-2024-on-campus-sexual-assault"}, {"label": "Cornell Daily Sun (sentencing)", "url": "https://www.cornellsun.com/article/2026/02/former-cornell-student-sentenced-to-eight-years-for-2024-on-campus-rape"}, {"label": "The Ithaca Voice", "url": "https://ithacavoice.org/2025/11/former-cornell-student-convicted-of-2024-campus-rape/"}, {"label": "CNY Central", "url": "https://cnycentral.com/news/local/former-cornell-student-convicted-of-rape-of-physically-helpless-person-university-jury-burglary-sentencing-crimes-wstm-wtvh"}]
   },
   {
@@ -1141,7 +1141,7 @@ window.CASES = [
     tracks: [{"track": "criminal", "step": 5, "state": "closed", "short": "Convicted; life sentence", "note": "Convicted on all counts in federal court (May 2024); sentenced to life in prison."}, {"track": "civil", "step": 4, "state": "closed", "short": "Settled (>$1B)", "note": "Weill Cornell agreed to pay more than $1 billion to former patients."}, {"track": "federal", "step": 3, "state": "closed", "short": "Agreement; investigation closed", "note": "Agreement with the U.S. Attorney (SDNY), July 2026: $30M patient-safety institute and reforms; criminal investigation of the institution closed."}],
     affected: null,
     payout: 1000000000,
-    named: [{"name": "Darius Paduch", "basis": "Convicted on all counts of sexually exploiting patients (federal, 2024); sentenced to life"}],
+    named: [{"name": "Darius Paduch", "basis": "Convicted on all counts of sexually exploiting patients (federal, 2024); sentenced to life", "photo": "https://www.nbcnews.com/news/us-news/nyc-urologist-sentenced-life-sexual-abuse-patients-minors-rcna181128"}],
     sources: [{"label": "U.S. Attorney, SDNY", "url": "https://www.justice.gov/usao-sdny/pr/weill-cornell-medicine-resolves-criminal-investigation-agreement-maintain-and-enhance"}, {"label": "Gothamist", "url": "https://gothamist.com/news/weill-cornell-settles-federal-probe-of-claims-it-allowed-sexual-abuse-to-go-unchecked"}, {"label": "U.S. News / AP", "url": "https://www.usnews.com/news/us/articles/2026-07-27/weill-cornell-medicine-deal-to-boost-sexual-abuse-prevention-ends-criminal-investigation"}, {"label": "Cornell Daily Sun", "url": "https://www.cornellsun.com/article/2026/08/z0dczq2glgbv"}]
   },
   {
@@ -1162,7 +1162,7 @@ window.CASES = [
     tracks: [{"track": "criminal", "step": 6, "state": "closed", "short": "Convicted; appeal denied", "note": "Convicted 2019 on five counts of rape and other charges; Utah Supreme Court upheld the convictions (June 2023)."}],
     affected: 7,
     payout: 0,
-    named: [{"name": "Torrey Green", "basis": "Convicted of five counts of rape and sexual battery (2019); sentenced to 26 years to life"}],
+    named: [{"name": "Torrey Green", "basis": "Convicted of five counts of rape and sexual battery (2019); sentenced to 26 years to life", "photo": "https://www.ksl.com/article/46519248/you-are-a-serial-rapist-judge-sends-torrey-green-to-prison-for-at-least-26-years"}],
     sources: [{"label": "ESPN", "url": "https://www.espn.com/college-football/story/_/id/26375287/ex-utah-st-player-sentenced-sexual-assaults"}, {"label": "KSL (Supreme Court)", "url": "https://www.ksl.com/article/50666050/utah-supreme-court-rules-former-usu-football-players-rape-convictions-will-stand"}, {"label": "Salt Lake Tribune (seventh case)", "url": "https://www.sltrib.com/news/2023/09/20/ex-usu-football-player-torrey/"}]
   },
   {
