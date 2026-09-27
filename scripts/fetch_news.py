@@ -30,7 +30,7 @@ MAX_ITEMS = 150
 # At least one of these must appear in the headline, so unrelated stories are dropped.
 CAMPUS_WORDS = re.compile(r"\b(universit|college|campus|student|fraternit|sororit|Title IX|Clery|dorm|athlete|coach|professor)", re.I)
 # This tracker covers US colleges: drop K-12 stories and coverage of campuses abroad.
-EXCLUDE_WORDS = re.compile(r"\b(high school|middle school|elementary|K-12|school district|India|Indian|Punjab|Delhi|Mumbai|Kolkata|Bengal|Kerala|Pakistan|Bangladesh|Nigeria|Kenya|Uganda|Ghana|Philippines|Australia|Australian|Canada|Canadian|UK|British|England|Scotland|Ireland|China|Chinese|Japan|Korea|Vietnam|LPU)\b", re.I)
+EXCLUDE_WORDS = re.compile(r"\b(high school|middle school|elementary|K-12|school district|India|Punjab|Delhi|Mumbai|Kolkata|Bengal|Kerala|Pakistan|Bangladesh|Nigeria|Kenya|Uganda|Ghana|Philippines|Australia|Australian|Canada|Canadian|UK|British|England|Scotland|Ireland|LPU)\b", re.I)
 FOREIGN_OUTLETS = re.compile(r"(India|NDTV|Livemint|Rediff|ABP|TheWire\.in|NewsX|Gulf News|Hindustan|Deccan|Tribune India|Dawn|Punch|VnExpress|Korea|Straits|SCMP|ABC \(Australia\)|CBC|BBC|Guardian Nigeria)", re.I)
 ABUSE_WORDS = re.compile(r"\b(rape|raped|sexual|sex abuse|sex assault|assault|abuse|misconduct|Title IX|Clery)", re.I)
 
