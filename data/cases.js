@@ -10,11 +10,13 @@
 //  - `affected` is the number of complainants/plaintiffs reported in the cited sources
 //    (a floor, not a prevalence estimate). `payout` is USD in settlements + federal fines.
 //
+// clery: "<Clery INSTNM>|<branch substring>" links the case to its campus row in data/clery.js.
 // statusCategory: "conviction" | "settled" | "pending" | "federal" | "no-charges" | "discredited"
 
 window.CASES = [
   {
     id: "cornell-2024",
+    clery: "Cornell University|Endowed",
     school: "Cornell University",
     city: "Ithaca", state: "NY", lat: 42.4534, lng: -76.4735,
     year: 2024, reported: 2026,
@@ -35,6 +37,7 @@ window.CASES = [
   },
   {
     id: "stanford-2015",
+    clery: "Stanford University|Main Campus",
     school: "Stanford University",
     city: "Stanford", state: "CA", lat: 37.4275, lng: -122.1697,
     year: 2015, reported: 2015,
@@ -52,6 +55,7 @@ window.CASES = [
   },
   {
     id: "msu-nassar",
+    clery: "Michigan State University|",
     school: "Michigan State University",
     city: "East Lansing", state: "MI", lat: 42.7018, lng: -84.4822,
     year: 2016, reported: 2016,
@@ -69,6 +73,7 @@ window.CASES = [
   },
   {
     id: "usc-tyndall",
+    clery: "University of Southern California|University Park",
     school: "University of Southern California",
     city: "Los Angeles", state: "CA", lat: 34.0224, lng: -118.2851,
     year: 2018, reported: 2018,
@@ -87,6 +92,7 @@ window.CASES = [
   },
   {
     id: "columbia-hadden",
+    clery: "Columbia University in the City of New York|Morningside",
     school: "Columbia University",
     city: "New York", state: "NY", lat: 40.8075, lng: -73.9626,
     year: 2012, reported: 2012,
@@ -105,6 +111,7 @@ window.CASES = [
   },
   {
     id: "ucla-heaps",
+    clery: "University of California-Los Angeles|",
     school: "University of California, Los Angeles",
     city: "Los Angeles", state: "CA", lat: 34.0689, lng: -118.4452,
     year: 2019, reported: 2019,
@@ -122,6 +129,7 @@ window.CASES = [
   },
   {
     id: "osu-strauss",
+    clery: "Ohio State University-Main Campus|",
     school: "The Ohio State University",
     city: "Columbus", state: "OH", lat: 40.0067, lng: -83.0305,
     year: 1978, reported: 2018,
@@ -140,6 +148,7 @@ window.CASES = [
   },
   {
     id: "umich-anderson",
+    clery: "University of Michigan-Ann Arbor|",
     school: "University of Michigan",
     city: "Ann Arbor", state: "MI", lat: 42.2780, lng: -83.7382,
     year: 1966, reported: 2020,
@@ -157,6 +166,7 @@ window.CASES = [
   },
   {
     id: "baylor",
+    clery: "Baylor University|",
     school: "Baylor University",
     city: "Waco", state: "TX", lat: 31.5489, lng: -97.1131,
     year: 2012, reported: 2016,
@@ -175,6 +185,7 @@ window.CASES = [
   },
   {
     id: "vanderbilt-2013",
+    clery: "Vanderbilt University|",
     school: "Vanderbilt University",
     city: "Nashville", state: "TN", lat: 36.1447, lng: -86.8027,
     year: 2013, reported: 2013,
@@ -196,6 +207,7 @@ window.CASES = [
   },
   {
     id: "pennstate-sandusky",
+    clery: "Pennsylvania State University-Main Campus|University Park",
     school: "Pennsylvania State University",
     city: "University Park", state: "PA", lat: 40.7982, lng: -77.8599,
     year: 2011, reported: 2011,
@@ -213,6 +225,7 @@ window.CASES = [
   },
   {
     id: "liberty",
+    clery: "Liberty University|",
     school: "Liberty University",
     city: "Lynchburg", state: "VA", lat: 37.3524, lng: -79.1797,
     year: 2016, reported: 2021,
@@ -230,6 +243,7 @@ window.CASES = [
   },
   {
     id: "emu-2006",
+    clery: "Eastern Michigan University|",
     school: "Eastern Michigan University",
     city: "Ypsilanti", state: "MI", lat: 42.2506, lng: -83.6245,
     year: 2006, reported: 2007,
@@ -248,6 +262,7 @@ window.CASES = [
   },
   {
     id: "colorado-2001",
+    clery: "University of Colorado Boulder|",
     school: "University of Colorado Boulder",
     city: "Boulder", state: "CO", lat: 40.0076, lng: -105.2659,
     year: 2001, reported: 2002,
@@ -265,6 +280,7 @@ window.CASES = [
   },
   {
     id: "tennessee-2016",
+    clery: "The University of Tennessee-Knoxville|",
     school: "University of Tennessee, Knoxville",
     city: "Knoxville", state: "TN", lat: 35.9544, lng: -83.9295,
     year: 2013, reported: 2016,
@@ -282,6 +298,7 @@ window.CASES = [
   },
   {
     id: "fsu-2012",
+    clery: "Florida State University|Main Campus",
     school: "Florida State University",
     city: "Tallahassee", state: "FL", lat: 30.4419, lng: -84.2985,
     year: 2012, reported: 2013,
@@ -300,6 +317,7 @@ window.CASES = [
   },
   {
     id: "oregon-2014",
+    clery: "University of Oregon|",
     school: "University of Oregon",
     city: "Eugene", state: "OR", lat: 44.0448, lng: -123.0726,
     year: 2014, reported: 2014,
@@ -317,6 +335,7 @@ window.CASES = [
   },
   {
     id: "dartmouth-pbs",
+    clery: "Dartmouth College|Main",
     school: "Dartmouth College",
     city: "Hanover", state: "NH", lat: 43.7044, lng: -72.2887,
     year: 2017, reported: 2018,
@@ -335,6 +354,7 @@ window.CASES = [
   },
   {
     id: "montana-doj",
+    clery: "The University of Montana|",
     school: "University of Montana",
     city: "Missoula", state: "MT", lat: 46.8601, lng: -113.9852,
     year: 2010, reported: 2012,
@@ -352,6 +372,7 @@ window.CASES = [
   },
   {
     id: "unc-clery",
+    clery: "University of North Carolina at Chapel Hill|",
     school: "University of North Carolina at Chapel Hill",
     city: "Chapel Hill", state: "NC", lat: 35.9049, lng: -79.0469,
     year: 2013, reported: 2013,
@@ -369,6 +390,7 @@ window.CASES = [
   },
   {
     id: "harvard-law-ocr",
+    clery: "Harvard University|",
     school: "Harvard Law School",
     city: "Cambridge", state: "MA", lat: 42.3770, lng: -71.1167,
     year: 2012, reported: 2014,
@@ -386,6 +408,7 @@ window.CASES = [
   },
   {
     id: "minnesota-2016",
+    clery: "University of Minnesota-Twin Cities|",
     school: "University of Minnesota",
     city: "Minneapolis", state: "MN", lat: 44.9740, lng: -93.2277,
     year: 2016, reported: 2016,
@@ -403,6 +426,7 @@ window.CASES = [
   },
   {
     id: "byu-2016",
+    clery: "Brigham Young University|230038",
     school: "Brigham Young University",
     city: "Provo", state: "UT", lat: 40.2518, lng: -111.6493,
     year: 2016, reported: 2016,
@@ -420,6 +444,7 @@ window.CASES = [
   },
   {
     id: "uva-rollingstone",
+    clery: "University of Virginia-Main Campus|Main",
     school: "University of Virginia",
     city: "Charlottesville", state: "VA", lat: 38.0336, lng: -78.5080,
     year: 2014, reported: 2014,
@@ -437,6 +462,7 @@ window.CASES = [
   },
   {
     id: "duke-2006",
+    clery: "Duke University|",
     school: "Duke University",
     city: "Durham", state: "NC", lat: 36.0014, lng: -78.9382,
     year: 2006, reported: 2006,

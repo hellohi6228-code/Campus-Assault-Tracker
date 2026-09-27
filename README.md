@@ -1,9 +1,10 @@
 # Campus Assault Tracker
 
-A static website that shows campus sexual violence in the US from two sources:
+A static website with three parts:
 
-1. **Federal Clery Act data for every campus.** These are all rapes, fondling, incest and statutory rape cases that colleges reported to the US Department of Education (about 11,000–15,000 per year nationally, 2016–2024, across 2,300+ campuses). The site shows them as a heat map, rankings by count, by rate per student and by state, a lookup for any school, and a national trend chart.
-2. **Major cases.** Well-documented scandals, each with its current status (conviction, settlement, pending lawsuit, federal finding) and cited sources.
+- **Map:** every US campus that reported a sex offense under the Clery Act (2,300+ campuses). State outlines are bundled in `data/us-states.js`, so the map needs no tile service or API key.
+- **Search bar:** find any school, city or state.
+- **Ranked table:** campuses ranked by reported sex offenses (or by reports per 10,000 students). Schools with a documented lawsuit or federal investigation have an expandable entry with its current status and sources (`data/cases.js`).
 
 ## Run it
 It's plain HTML with no build step. Open `index.html`, or publish it with GitHub Pages (Settings → Pages → deploy from this branch, root folder).
