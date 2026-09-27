@@ -63,13 +63,22 @@
     });
   }
 
+  // "Pennsylvania State University-Main Campus" -> "Pennsylvania State University"; add the branch only
+  // when the school has several campuses and the branch isn't its main one.
+  function displayName(c) {
+    var name = c[0].replace(/-Main Campus$/, "");
+    var branch = (c[1] || "").trim();
+    if (nameCount[c[0]] > 1 && branch && !/main|^university park|^ann arbor|endowed/i.test(branch) && branch !== c[0]) name += " — " + branch;
+    return name;
+  }
+
   var rows = CLERY.campuses.map(function (c, i) {
     var rape = 0, total = 0;
     c[7].forEach(function (v) { rape += v[0]; total += v[0] + v[1] + v[2]; });
     var state = c[3] && c[3] !== "nan" ? c[3] : "";
     return {
       i: i, raw: c,
-      name: c[0] + (nameCount[c[0]] > 1 && c[1] ? " — " + c[1] : ""),
+      name: displayName(c),
       place: [c[2], state].filter(Boolean).join(", "),
       state: state, lat: c[4], lng: c[5], enroll: c[6],
       perYear: c[7], rape: rape, total: total, cases: []
@@ -182,7 +191,7 @@
   function renderList() {
     var term = q.value.trim().toLowerCase();
     var list = !term ? ranked : ranked.filter(function (r) {
-      return matches(r.name + " " + r.place, term) || r.state.toLowerCase() === term ||
+      return matches(r.name + " " + r.place + " " + r.raw[0] + " " + r.raw[1], term) || r.state.toLowerCase() === term ||
         r.cases.some(function (k) { return matches(caseText(k), term); });
     });
     var head = '<thead><tr><th class="n">#</th><th>University</th>' +
@@ -257,7 +266,7 @@
         if (current !== r || !rows.length) return;
         document.getElementById("school-log").innerHTML =
           "<h4>Reports in the campus crime log (" + rows.length + ")</h4>" +
-          '<p class="muted small">From the school police Daily Crime Log, collected daily since Sept 2026. Logs show no names.</p>' +
+          '<p class="muted small">From the school police Daily Crime Log, checked every 3 hours since Sept 27, 2026. Logs never include names.</p>' +
           '<div class="log">' + rows.map(function (e) {
             return "<details><summary><span class=\"log-date\">" + esc((e.reported || "").split(" ")[0]) + "</span> " +
               esc(e.nature || (e.offenses || []).join(", ")) + "</summary><dl>" +
