@@ -16,13 +16,13 @@
     <div id="map" role="img" aria-label="Map of reported campus sex offenses"></div>
 
     <div class="controls">
-      <input type="search" id="q" placeholder="Search any school, city or state…" aria-label="Search schools" autocomplete="off">
-      <div class="toggle" role="group" aria-label="Rank by">
-        <button type="button" data-sort="total" class="on">Most reports</button>
-        <button type="button" data-sort="rate">Per 10k students</button>
+      <input type="search" id="q" placeholder="Search any university, city, state or case…" aria-label="Search schools" autocomplete="off">
+      <div class="toggle" role="group" aria-label="View">
+        <button type="button" data-view="schools" class="on">Universities</button>
+        <button type="button" data-view="cases">All cases</button>
       </div>
     </div>
-    <details class="process" id="process"><summary>How a rape case moves through the legal system</summary><div id="process-body"></div></details>
+    <details class="process" id="process"><summary>How a sexual assault case moves through the legal system</summary><div id="process-body"></div></details>
     <p class="count" id="count"></p>
 
     <div class="table-wrap"><table class="rank" id="rank"></table></div>

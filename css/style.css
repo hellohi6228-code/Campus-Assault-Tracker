@@ -103,3 +103,24 @@ tr.detail td { background: var(--bg); }
 .news li:first-child { border-top: 0; }
 .news a { font-weight: 600; text-decoration: none; }
 .news a:hover { text-decoration: underline; }
+
+tr.click { cursor: pointer; }
+tr.click:hover td, tr.click:focus td { background: var(--bg); }
+tr.click.open td { background: var(--bg); border-bottom-color: transparent; }
+tr.click:focus { outline: 2px solid var(--link); outline-offset: -2px; }
+.caret { display: inline-block; width: 1em; color: var(--muted); }
+.chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
+.chip { font-size: .72rem; font-weight: 600; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--border); color: var(--text); background: var(--surface); white-space: nowrap; }
+.chip.live { background: var(--accent); border-color: var(--accent); color: var(--surface); }
+.rank.cases .case-title { min-width: 200px; }
+tr.detail > td { padding: 6px 16px 18px; }
+tr.detail h4 { margin: 16px 0 6px; font-size: .95rem; }
+table.yrs { border-collapse: collapse; font-size: .88rem; margin: 4px 0; }
+.yrs th, .yrs td { padding: 4px 12px 4px 0; border-bottom: 1px solid var(--border); text-align: left; }
+.yrs .n { text-align: right; font-variant-numeric: tabular-nums; }
+.yrs tr.tot td { font-weight: 700; border-bottom: 0; }
+.mini-news { list-style: none; padding: 0; margin: 4px 0; }
+.mini-news li { margin: 6px 0; font-size: .9rem; }
+@media (max-width: 600px) { .chip { white-space: normal; } .rank.cases .case-title { min-width: 0; } }
+.mobile-only { display: none; }
+@media (max-width: 600px) { .mobile-only { display: block; margin-top: 4px; } }
