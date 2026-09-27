@@ -131,8 +131,8 @@ table.yrs { border-collapse: collapse; font-size: .88rem; margin: 4px 0; }
 .big span { color: var(--muted); font-size: .82rem; }
 
 .go { color: var(--muted); font-weight: 400; }
-.back { font: inherit; font-weight: 600; padding: 8px 14px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--link); cursor: pointer; margin: 18px 0 6px; }
-.school-page { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 4px 18px 18px; margin-top: 16px; }
+.back { font: inherit; font-weight: 600; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--link); cursor: pointer; margin: 12px 0 4px; }
+.school-page { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 4px 16px 16px; margin-top: 6px; }
 .school-h { margin: 8px 0 2px; font-size: 1.4rem; }
 .school-page h4 { margin: 20px 0 6px; font-size: 1rem; }
 .school-page .case { border-top: 1px solid var(--border); padding-top: 12px; margin-top: 12px; max-width: none; }
