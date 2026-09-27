@@ -15,7 +15,7 @@ import sys
 import urllib.parse
 import urllib.request
 
-UA = {"User-Agent": "campus-assault-tracker/1.0 (photo lookup; https://github.com/hellohi6228-code/Campus-rape-heat-map-)"}
+UA = {"User-Agent": "campus-assault-tracker/1.0 (photo lookup; https://github.com/hellohi6228-code/Campus-Assault-Tracker)"}
 FREE = re.compile(r"^(public domain|pd|cc0|cc[- ]by(-sa)?( \d\.\d)?)", re.I)
 # Article titles to try, in order, when a person's own article doesn't exist or has no image.
 EXTRA_TITLES = {"Brock Turner": ["People v. Turner"], "Tevin Elliott": ["Tevin Elliot"]}
