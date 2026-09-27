@@ -23,5 +23,11 @@ window.PHOTOS = {
   "license": "Public domain",
   "page": "https://commons.wikimedia.org/wiki/File:Robert_Hadden_Mushot.jpg",
   "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5b/Robert_Hadden_Mushot.jpg/250px-Robert_Hadden_Mushot.jpg"
+ },
+ "Roy Charles Waller": {
+  "credit": "Sacramento Police Department",
+  "license": "Public domain",
+  "page": "https://commons.wikimedia.org/wiki/File:Roy_Charles_Waller.jpg",
+  "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0b/Roy_Charles_Waller.jpg/250px-Roy_Charles_Waller.jpg"
  }
 };
