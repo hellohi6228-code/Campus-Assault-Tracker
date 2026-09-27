@@ -25,6 +25,11 @@ jobs:
           git config user.email "41898208+github-actions[bot]@users.noreply.github.com"
           git add data/school-news
           git diff --cached --quiet && exit 0
-          git commit -m "Update school news archive"
+          # Other jobs also rewrite the search index, so rebuild it on top of the latest branch before committing.
+          git stash
           git pull --rebase
+          git stash pop
+          python scripts/build_search_index.py
+          git add data/school-news data/search-index.json
+          git commit -m "Update school news archive"
           git push

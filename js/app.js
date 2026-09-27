@@ -245,20 +245,48 @@
 
   // ---- Search results: universities, matched by name, place or case details ----
   function matches(text, term) { return text.toLowerCase().indexOf(term) !== -1; }
-  function caseText(k) { return [k.school, k.title, k.summary, k.status, k.type, (k.tracks || []).map(function (t) { return t.short + " " + t.note; }).join(" ")].join(" "); }
+  function caseText(k) {
+    return [k.school, k.title, k.summary, k.status, k.type, k.year, k.reported, (k.keywords || []).join(" "),
+      (k.named || []).map(function (p) { return p.name + " " + p.basis; }).join(" "),
+      (k.sources || []).map(function (s) { return s.label; }).join(" "),
+      (k.tracks || []).map(function (t) { return t.short + " " + t.note; }).join(" ")].join(" ");
+  }
+  // Headlines and crime-log entries for every school (data/search-index.json), so search reaches all of them.
+  var searchIdx = {};
+  function indexHit(r, term) {
+    if (firstRow[r.raw[0]] !== r) return "";
+    var text = searchIdx[slug(r.raw[0])];
+    if (!text) return "";
+    var at = text.toLowerCase().indexOf(term);
+    if (at === -1) return "";
+    return text.slice(text.lastIndexOf("\n", at) + 1, (text.indexOf("\n", at) + 1 || text.length + 1) - 1);
+  }
+  // Why a school matched, shown under its name: a person's name, a case title, or a headline.
+  function matchNote(r, term) {
+    if (matches(r.name + " " + r.place + " " + r.raw[0] + " " + r.raw[1], term) || r.state.toLowerCase() === term) return "";
+    for (var i = 0; i < r.cases.length; i++) {
+      var k = r.cases[i];
+      var who = (k.named || []).filter(function (p) { return matches(p.name, term); })[0];
+      if (who) return who.name + " — " + k.title;
+      if (matches(caseText(k), term)) return k.title;
+    }
+    return indexHit(r, term);
+  }
 
   function renderList() {
     var term = q.value.trim().toLowerCase();
     var list = (!term ? rows.slice() : rows.filter(function (r) {
       return matches(r.name + " " + r.place + " " + r.raw[0] + " " + r.raw[1], term) || r.state.toLowerCase() === term ||
-        r.cases.some(function (k) { return matches(caseText(k), term); });
+        r.cases.some(function (k) { return matches(caseText(k), term); }) || !!indexHit(r, term);
     })).sort(function (a, b) { return b.total - a.total || b.count - a.count; });
     var head = '<thead><tr><th class="n">#</th><th>University</th><th class="n">Reports<div class="th-sub">' + span + '</div></th><th class="n">Cases &amp; news<div class="th-sub">with details</div></th></tr></thead>';
+    var note;
     var body = list.slice(0, shown).map(function (r, i) {
       return '<tr class="click" data-school="' + r.i + '" tabindex="0">' +
         '<td class="n muted">' + (i + 1) + "</td>" +
         '<td><div class="school">' + esc(r.name) + ' <span class="go">›</span></div>' +
-        '<div class="muted small">' + esc(r.place) + "</div></td>" +
+        '<div class="muted small">' + esc(r.place) + "</div>" +
+        (term && (note = matchNote(r, term)) ? '<div class="hit-note small">Match: ' + esc(note) + "</div>" : "") + "</td>" +
         '<td class="n"><b>' + num(r.total) + '</b></td><td class="n">' + (r.count ? num(r.count) : '<span class="muted">0</span>') + "</td></tr>";
     }).join("");
     document.getElementById("rank").innerHTML = head + "<tbody>" + (body || '<tr><td colspan="4" class="muted">No university matches “' + esc(term) + "”.</td></tr>") + "</tbody>";
@@ -287,6 +315,7 @@
       '<div class="items" id="items">' + r.cases.map(caseItem).join("") + "</div>" +
       (r.count ? "" : '<p class="muted" id="no-cases">No public cases or news reports on file for this school yet.</p>') +
       '';
+    markHits();
     loadCrimeLog(r, token);
     loadSchoolNews(r, token);
     document.getElementById("back").addEventListener("click", goBack);
@@ -325,7 +354,15 @@
         updateCount(r);
       }, function () {});
   }
+  function markHits() {
+    var term = q.value.trim().toLowerCase();
+    if (!term) return;
+    document.querySelectorAll("#items > details").forEach(function (d) {
+      if (!d.classList.contains("hit") && matches(d.textContent, term)) { d.classList.add("hit"); d.open = true; }
+    });
+  }
   function updateCount(r) {
+    markHits();
     var n = document.querySelectorAll("#items > details").length;
     document.getElementById("case-count").textContent = "Cases and news reports (" + num(n) + ")";
     var none = document.getElementById("no-cases");
@@ -409,6 +446,9 @@
   fetch("data/crimelog/index.json", { cache: "no-cache" })
     .then(function (res) { return res.ok ? res.json() : {}; })
     .then(function (idx) { logIdx = idx || {}; recount(); show(); }, function () {});
+  fetch("data/search-index.json", { cache: "no-cache" })
+    .then(function (res) { return res.ok ? res.json() : {}; })
+    .then(function (idx) { searchIdx = idx || {}; if (!current && q.value.trim()) renderList(); }, function () {});
   fetch("data/school-news/index.json", { cache: "no-cache" })
     .then(function (res) { return res.ok ? res.json() : {}; })
     .then(function (idx) { newsIdx = idx || {}; recount(); show(); }, function () {});
