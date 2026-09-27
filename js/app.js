@@ -218,10 +218,11 @@
   var listScroll = 0;      // scroll position to restore when going back to results
 
   // ---- Map (bundled state outlines: no tile service or API key) ----
+  var map = null, heat = null;
   if (window.L) {
     var css = getComputedStyle(document.documentElement);
     var accent = css.getPropertyValue("--accent").trim();
-    var map = L.map("map", { scrollWheelZoom: false, preferCanvas: true, zoomSnap: 0.25, minZoom: 3, maxZoom: 12 });
+    map = L.map("map", { scrollWheelZoom: false, preferCanvas: true, zoomSnap: 0.25, minZoom: 3, maxZoom: 12 });
     if (window.US_STATES) {
       L.geoJSON(window.US_STATES, {
         style: { color: css.getPropertyValue("--map-line").trim(), weight: 1, fillColor: css.getPropertyValue("--map-land").trim(), fillOpacity: 1 },
@@ -232,12 +233,12 @@
     map.attributionControl.addAttribution("States: US Census Bureau via us-atlas");
     var maxT = ranked.length ? ranked[0].total : 1;
     if (L.heatLayer) {
-      L.heatLayer(rows.map(function (r) { return [r.lat, r.lng, Math.min(1, 0.15 + Math.sqrt(r.total / maxT))]; }),
+      heat = L.heatLayer(rows.map(function (r) { return [r.lat, r.lng, Math.min(1, 0.15 + Math.sqrt(r.total / maxT))]; }),
         { radius: 20, blur: 16, maxZoom: 8, minOpacity: 0.3 }).addTo(map);
     }
     var renderer = L.canvas({ padding: 0.3 });
     rows.forEach(function (r) {
-      L.circleMarker([r.lat, r.lng], {
+      r.marker = L.circleMarker([r.lat, r.lng], {
         renderer: renderer, radius: 2 + 10 * Math.sqrt(r.total / maxT),
         color: accent, weight: r.cases.length ? 2 : 1, fillColor: accent, fillOpacity: r.cases.length ? 0.8 : 0.35
       }).bindPopup(function () {
@@ -280,12 +281,40 @@
     return indexHit(r, term);
   }
 
+  // ---- Legal-process filter: only schools with a documented case on that track (map dots and ranking) ----
+  var trackFilter = "";
+  var TRACK_NAME = { criminal: "a criminal case", civil: "a civil lawsuit", campus: "a school (Title IX) case" };
+  function hasTrack(r) {
+    if (!trackFilter) return true;
+    return r.cases.some(function (k) { return (k.tracks || []).some(function (t) { return t.track === trackFilter; }); });
+  }
+  function applyMapFilter() {
+    if (!map) return;
+    rows.forEach(function (r) {
+      var on = hasTrack(r);
+      if (on && !map.hasLayer(r.marker)) r.marker.addTo(map);
+      if (!on && map.hasLayer(r.marker)) map.removeLayer(r.marker);
+    });
+    if (heat) heat.setLatLngs(rows.filter(hasTrack).map(function (r) { return [r.lat, r.lng, Math.min(1, 0.15 + Math.sqrt(r.total / maxT))]; }));
+  }
+  document.getElementById("filters").addEventListener("click", function (e) {
+    var b = e.target.closest(".chip");
+    if (!b) return;
+    trackFilter = b.getAttribute("data-track");
+    document.querySelectorAll("#filters .chip").forEach(function (c) {
+      var on = c === b; c.classList.toggle("on", on); c.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+    shown = 50;
+    applyMapFilter();
+    if (current) { history.replaceState(null, "", location.pathname + location.search); show(); } else renderList();
+  });
+
   function renderList() {
     var term = q.value.trim().toLowerCase();
     var list = (!term ? rows.slice() : rows.filter(function (r) {
       return matches(r.name + " " + r.place + " " + r.raw[0] + " " + r.raw[1], term) || r.state.toLowerCase() === term ||
         r.cases.some(function (k) { return matches(caseText(k), term); }) || !!indexHit(r, term);
-    })).sort(function (a, b) { return b.total - a.total || b.count - a.count; });
+    })).filter(hasTrack).sort(function (a, b) { return b.total - a.total || b.count - a.count; });
     var head = '<thead><tr><th class="n">#</th><th>University</th><th class="n">Reports<div class="th-sub">' + span + '</div></th><th class="n">Cases &amp; news<div class="th-sub">with details</div></th></tr></thead>';
     var note;
     var body = list.slice(0, shown).map(function (r, i) {
@@ -296,10 +325,11 @@
         (term && (note = matchNote(r, term)) ? '<div class="hit-note small">Match: ' + esc(note) + "</div>" : "") + "</td>" +
         '<td class="n"><b>' + num(r.total) + '</b></td><td class="n">' + (r.count ? num(r.count) : '<span class="muted">0</span>') + "</td></tr>";
     }).join("");
-    document.getElementById("rank").innerHTML = head + "<tbody>" + (body || '<tr><td colspan="4" class="muted">No university matches “' + esc(term) + "”.</td></tr>") + "</tbody>";
+    document.getElementById("rank").innerHTML = head + "<tbody>" + (body || '<tr><td colspan="4" class="muted">No university matches' + (term ? " “" + esc(term) + "”" : "") + ".</td></tr>") + "</tbody>";
     var reports = list.reduce(function (a, r) { return a + r.total; }, 0);
-    document.getElementById("count").textContent = term
-      ? num(reports) + " sex offenses reported to the federal government at " + num(list.length) + " matching universities (" + span + ")."
+    document.getElementById("count").textContent = term || trackFilter
+      ? num(reports) + " sex offenses reported to the federal government at " + num(list.length) + (term ? " matching" : "") + " universities" +
+        (trackFilter ? " with " + TRACK_NAME[trackFilter] + " on file" : "") + " (" + span + ")."
       : num(nationalTotal) + " sex offenses reported to the federal government by US colleges (" + span + ")." + pendingNote;
     document.getElementById("more").hidden = list.length <= shown;
     renderNews(term);
@@ -307,19 +337,45 @@
   }
 
   // ---- New finds: the newest stories and crime-log reports across all schools (data/new-finds.json) ----
-  var finds = [];
+  var finds = [], findPos = 0, findTimer = null, findPaused = false;
+  var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function findHTML(f) {
+    var r = rows.filter(function (x) { return firstRow[x.raw[0]] === x && slug(x.raw[0]) === f.slug; })[0];
+    var title = f.u ? '<a href="' + esc(f.u) + '" target="_blank" rel="noopener">' + esc(f.t) + "</a>" : esc(f.t);
+    return '<div class="find">' + badge(f.k === "log" ? "t-crim" : "t-news", f.k === "log" ? "Police" : "News") + ' <span class="find-t">' + title + "</span>" +
+      '<div class="muted small">' + (r ? '<a href="#school-' + r.i + '" class="finds-school" data-school="' + r.i + '">' + esc(r.name) + "</a>" : esc(f.school)) +
+      " · " + fmtDate(f.d) + "</div></div>";
+  }
+  function showFind(i) {
+    var n = Math.min(finds.length, 10);
+    if (!n) return;
+    findPos = (i + n) % n;
+    var el = document.getElementById("finds-list");
+    el.classList.remove("in"); void el.offsetWidth;   // restart the fade
+    el.innerHTML = findHTML(finds[findPos]);
+    el.classList.add("in");
+    document.getElementById("finds-pos").textContent = (findPos + 1) + " / " + n;
+  }
+  function startFinds() {
+    clearInterval(findTimer);
+    if (!reduceMotion) findTimer = setInterval(function () { if (!findPaused && !document.hidden) showFind(findPos + 1); }, 5000);
+  }
   function renderFinds(term) {
     var box = document.getElementById("finds");
     box.hidden = !!term || !finds.length;
-    if (box.hidden) return;
-    document.getElementById("finds-list").innerHTML = finds.slice(0, 5).map(function (f) {
-      var r = rows.filter(function (x) { return firstRow[x.raw[0]] === x && slug(x.raw[0]) === f.slug; })[0];
-      var title = f.u ? '<a href="' + esc(f.u) + '" target="_blank" rel="noopener">' + esc(f.t) + "</a>" : esc(f.t);
-      return "<li>" + badge(f.k === "log" ? "t-crim" : "t-news", f.k === "log" ? "Police" : "News") + " " + title +
-        '<div class="muted small">' + (r ? '<a href="#school-' + r.i + '" class="finds-school" data-school="' + r.i + '">' + esc(r.name) + "</a>" : esc(f.school)) +
-        " · " + fmtDate(f.d) + "</div></li>";
-    }).join("");
+    if (box.hidden) { clearInterval(findTimer); return; }
+    showFind(findPos);
+    startFinds();
   }
+  (function () {
+    var box = document.getElementById("finds");
+    box.addEventListener("mouseenter", function () { findPaused = true; });
+    box.addEventListener("mouseleave", function () { findPaused = false; });
+    box.addEventListener("focusin", function () { findPaused = true; });
+    box.addEventListener("focusout", function () { findPaused = false; });
+    document.getElementById("finds-prev").addEventListener("click", function () { showFind(findPos - 1); startFinds(); });
+    document.getElementById("finds-next").addEventListener("click", function () { showFind(findPos + 1); startFinds(); });
+  })();
 
   // ---- One school's page ----
   var renderToken = 0;   // guards async loaders when a school view is re-rendered

@@ -6,7 +6,7 @@
   <title>Campus Assault Tracker</title>
   <meta name="description" content="Every sex offense reported by US colleges under the Clery Act, mapped and ranked by campus, with documented lawsuits and investigations.">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-  <link rel="stylesheet" href="css/style.css?v=202609280500">
+  <link rel="stylesheet" href="css/style.css?v=202609280520">
 </head>
 <body>
   <main class="wrap">
@@ -14,10 +14,21 @@
 
     <div id="map" role="img" aria-label="Map of reported campus sex offenses"></div>
 
+    <div class="filters" id="filters" role="group" aria-label="Filter by legal process">
+      <button type="button" class="chip on" data-track="" aria-pressed="true">All</button>
+      <button type="button" class="chip" data-track="criminal" aria-pressed="false"><span class="dot t-crim"></span>Criminal case</button>
+      <button type="button" class="chip" data-track="civil" aria-pressed="false"><span class="dot t-civ"></span>Civil lawsuit</button>
+      <button type="button" class="chip" data-track="campus" aria-pressed="false"><span class="dot t-sch"></span>School (Title IX)</button>
+    </div>
+
     <div class="controls" id="controls">
       <input type="search" id="q" placeholder="Search any university, person, city, state, case or headline…" aria-label="Search universities and cases" autocomplete="off">
     </div>
-    <section class="finds" id="finds" hidden aria-labelledby="finds-h"><h2 id="finds-h">New finds</h2><ul id="finds-list"></ul></section>
+    <section class="finds" id="finds" hidden aria-labelledby="finds-h" aria-roledescription="carousel">
+      <div class="finds-head"><h2 id="finds-h">New finds</h2>
+        <div class="finds-nav"><button type="button" id="finds-prev" aria-label="Previous">‹</button><span id="finds-pos" class="muted small" aria-live="polite"></span><button type="button" id="finds-next" aria-label="Next">›</button></div></div>
+      <div id="finds-list" class="finds-slide"></div>
+    </section>
     <details class="process" id="process"><summary>How a sexual assault case moves through the legal system</summary><div id="process-body"></div></details>
     <p class="count" id="count"></p>
     <section id="school" class="school-page" hidden></section>
@@ -37,12 +48,12 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
-  <script src="data/us-states.js?v=202609280500"></script>
-  <script src="data/clery.js?v=202609280500"></script>
-  <script src="data/process.js?v=202609280500"></script>
-  <script src="data/cases.js?v=202609280500"></script>
-  <script src="data/news.js?v=202609280500"></script>
-  <script src="data/photos.js?v=202609280500"></script>
-  <script src="js/app.js?v=202609280500"></script>
+  <script src="data/us-states.js?v=202609280520"></script>
+  <script src="data/clery.js?v=202609280520"></script>
+  <script src="data/process.js?v=202609280520"></script>
+  <script src="data/cases.js?v=202609280520"></script>
+  <script src="data/news.js?v=202609280520"></script>
+  <script src="data/photos.js?v=202609280520"></script>
+  <script src="js/app.js?v=202609280520"></script>
 </body>
 </html>
