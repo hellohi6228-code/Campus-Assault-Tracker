@@ -215,14 +215,33 @@
       '<button type="button" class="back" id="back">← Back to results</button>' +
       '<h2 class="school-h">' + esc(r.name) + "</h2>" +
       '<p class="muted small">' + esc(r.place) + " · " + num(r.total) + " sex offenses reported, " + span + " (" + num(r.rape) + " rape)</p>" +
-      (r.cases.length ? r.cases.map(caseHTML).join("") : '<p class="muted">No public cases on file for this school.</p>') +
-      (function () {
-        var news = newsFor(r);
-        return news.length ? "<h4>News</h4><ul class=\"mini-news\">" + news.slice(0, 8).map(function (n) {
-          return '<li><a href="' + esc(n.u) + '" target="_blank" rel="noopener">' + esc(n.t) + '</a> <span class="muted small">' + esc(n.s) + " · " + fmtDate(n.d) + "</span></li>";
-        }).join("") + "</ul>" : "";
-      })();
+      (r.cases.length ? r.cases.map(caseHTML).join("") : '<p class="muted">No court or lawsuit records on file for this school yet.</p>') +
+      '<div id="school-news"></div>';
+    loadSchoolNews(r);
     document.getElementById("back").addEventListener("click", goBack);
+  }
+
+  // News coverage for one school: the archive file built weekly for every school, plus this week's feed.
+  function slug(name) { return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80); }
+  function loadSchoolNews(r) {
+    var box = document.getElementById("school-news");
+    var fromFeed = newsFor(r);
+    function paint(archive) {
+      if (current !== r) return;
+      var seen = {}, all = [];
+      fromFeed.concat(archive).forEach(function (n) {
+        var k = n.t.toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 80);
+        if (!seen[k]) { seen[k] = 1; all.push(n); }
+      });
+      all.sort(function (a, b) { return b.d - a.d; });
+      box.innerHTML = all.length ? "<h4>News coverage (" + all.length + ")</h4><ul class=\"mini-news\">" + all.map(function (n) {
+        return '<li><a href="' + esc(n.u) + '" target="_blank" rel="noopener">' + esc(n.t) + '</a> <span class="muted small">' + esc(n.s) + " · " + fmtDate(n.d) + "</span></li>";
+      }).join("") + "</ul>" : "";
+    }
+    paint([]);
+    fetch("data/school-news/" + slug(r.raw[0]) + ".json", { cache: "no-cache" })
+      .then(function (res) { return res.ok ? res.json() : []; })
+      .then(paint, function () {});
   }
 
   function show() {

@@ -1,0 +1,32 @@
+name: Fetch school news archive
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "Only the N schools with the most reports (0 = all)"
+        default: "0"
+  schedule:
+    - cron: "23 7 * * 0"   # weekly, Sunday
+  push:
+    paths: [scripts/fetch_school_news.py, .github/workflows/fetch-school-news.yml]
+permissions:
+  contents: write
+concurrency: { group: data-commit, cancel-in-progress: false }
+jobs:
+  school-news:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: python scripts/fetch_school_news.py --limit "${{ github.event.inputs.limit || '0' }}"
+      - name: Commit updated archive
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898208+github-actions[bot]@users.noreply.github.com"
+          git add data/school-news
+          git diff --cached --quiet && exit 0
+          git commit -m "Update school news archive"
+          git pull --rebase
+          git push
