@@ -183,13 +183,14 @@
 
   function slug(name) { return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80); }
   var firstRow = {};
-  rows.forEach(function (r) { if (!(r.raw[0] in firstRow)) firstRow[r.raw[0]] = r; r.logCount = 0; r.count = r.cases.length; });
-  function applyLogIndex(idx) {
-    idx = idx || {};
+  rows.forEach(function (r) { if (!(r.raw[0] in firstRow)) firstRow[r.raw[0]] = r; r.logCount = 0; r.newsCount = 0; r.count = r.cases.length; });
+  var logIdx = {}, newsIdx = {};
+  function recount() {
     Object.keys(firstRow).forEach(function (name) {
       var r = firstRow[name];
-      r.logCount = idx[slug(name)] || 0;
-      r.count = r.cases.length + r.logCount;
+      r.logCount = logIdx[slug(name)] || 0;
+      r.newsCount = newsIdx[name] || 0;
+      r.count = r.cases.length + r.logCount + r.newsCount;
     });
   }
   function byCount(a, b) { return b.count - a.count || b.total - a.total; }
@@ -243,7 +244,7 @@
       return matches(r.name + " " + r.place + " " + r.raw[0] + " " + r.raw[1], term) || r.state.toLowerCase() === term ||
         r.cases.some(function (k) { return matches(caseText(k), term); });
     })).sort(function (a, b) { return b.total - a.total || b.count - a.count; });
-    var head = '<thead><tr><th class="n">#</th><th>University</th><th class="n">Reports<div class="th-sub">' + span + '</div></th><th class="n">Cases<div class="th-sub">with details</div></th></tr></thead>';
+    var head = '<thead><tr><th class="n">#</th><th>University</th><th class="n">Reports<div class="th-sub">' + span + '</div></th><th class="n">Cases &amp; news<div class="th-sub">with details</div></th></tr></thead>';
     var body = list.slice(0, shown).map(function (r, i) {
       return '<tr class="click" data-school="' + r.i + '" tabindex="0">' +
         '<td class="n muted">' + (i + 1) + "</td>" +
@@ -255,7 +256,7 @@
     var reports = list.reduce(function (a, r) { return a + r.total; }, 0);
     var cases = list.reduce(function (a, r) { return a + r.count; }, 0);
     document.getElementById("count").textContent = num(reports) + " sex offenses reported to the federal government at " + num(list.length) +
-      (term ? " matching" : "") + " universities (" + span + "). " + num(cases) + " of them have public case details you can open. Tap a university.";
+      (term ? " matching" : "") + " universities (" + span + "). " + num(cases) + " cases and news reports you can open. Tap a university.";
     document.getElementById("more").hidden = list.length <= shown;
     renderNews(term);
   }
@@ -270,37 +271,41 @@
       '<p class="muted small">' + esc(r.place) + "</p>" +
       '<p class="fed-top"><b>' + num(r.total) + "</b> sex offenses reported, " + span + " (" + num(r.rape) +
       ' rape). Schools report these to the government only as counts, with no names, dates or details.</p>' +
-      '<h4 id="case-count">Cases with public details (' + num(r.count) + ")</h4>" +
-      '<p class="legend small">' + badge("t-crim", "Criminal") + " " + badge("t-civ", "Civil") + " " + badge("t-sch", "School") + " " + badge("t-fed", "Federal") +
+      '<h4 id="case-count">Cases and news reports (' + num(r.count) + ")</h4>" +
+      '<p class="legend small">' + badge("t-crim", "Criminal") + " " + badge("t-civ", "Civil") + " " + badge("t-sch", "School") + " " + badge("t-fed", "Federal") + " " + badge("t-news", "News") +
       ' <span class="muted">Tap a case for details.</span></p>' +
       '<div class="items" id="items">' + r.cases.map(caseItem).join("") + "</div>" +
-      (r.count ? "" : '<p class="muted">No public cases on file for this school yet.</p>') +
-      '<div id="school-news"></div>';
+      (r.count ? "" : '<p class="muted" id="no-cases">No public cases or news reports on file for this school yet.</p>') +
+      '';
     loadCrimeLog(r, token);
-    loadSchoolNews(r);
+    loadSchoolNews(r, token);
     document.getElementById("back").addEventListener("click", goBack);
   }
 
   // News coverage for one school: the archive file built weekly for every school, plus this week's feed.
-  function loadSchoolNews(r) {
-    var box = document.getElementById("school-news");
-    var fromFeed = newsFor(r);
-    function paint(archive) {
-      if (current !== r) return;
-      var seen = {}, all = [];
-      fromFeed.concat(archive).forEach(function (n) {
-        var k = n.t.toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 80);
-        if (!seen[k]) { seen[k] = 1; all.push(n); }
-      });
-      all.sort(function (a, b) { return b.d - a.d; });
-      box.innerHTML = all.length ? "<h4>News coverage (" + all.length + ")</h4><ul class=\"mini-news\">" + all.map(function (n) {
-        return '<li><a href="' + esc(n.u) + '" target="_blank" rel="noopener">' + esc(n.t) + '</a> <span class="muted small">' + esc(n.s) + " · " + fmtDate(n.d) + "</span></li>";
-      }).join("") + "</ul>" : "";
-    }
-    paint([]);
+  function newsItem(n) {
+    return '<details class="item"><summary>' + badge("t-news", "News") + ' <span class="it-title">' + esc(n.t) +
+      '</span> <span class="muted small">' + fmtDate(n.d) + "</span></summary>" +
+      '<div class="it-body"><p>' + esc(n.s) + " · " + fmtDate(n.d) + '</p><p><a href="' + esc(n.u) +
+      '" target="_blank" rel="noopener">Read the article ↗</a></p><p class="muted small">Headline as published by the outlet. Allegations are unproven unless a court has ruled.</p></div></details>';
+  }
+  // News stories for one school, from the weekly archive (scripts/fetch_school_news.py).
+  function loadSchoolNews(r, token) {
+    if (firstRow[r.raw[0]] !== r || !r.newsCount) return;
     fetch("data/school-news/" + slug(r.raw[0]) + ".json", { cache: "no-cache" })
       .then(function (res) { return res.ok ? res.json() : []; })
-      .then(paint, function () {});
+      .then(function (items) {
+        if (current !== r || token !== renderToken || !items.length) return;
+        items.sort(function (a, b) { return b.d - a.d; });
+        document.getElementById("items").insertAdjacentHTML("beforeend", items.map(newsItem).join(""));
+        updateCount(r);
+      }, function () {});
+  }
+  function updateCount(r) {
+    var n = document.querySelectorAll("#items > details").length;
+    document.getElementById("case-count").textContent = "Cases and news reports (" + num(n) + ")";
+    var none = document.getElementById("no-cases");
+    if (none && n) none.hidden = true;
   }
 
   // Individual reports from the school's Daily Crime Log become case rows (see scripts/fetch_crime_logs.py).
@@ -311,7 +316,7 @@
       .then(function (entries) {
         if (current !== r || token !== renderToken || !entries.length) return;
         document.getElementById("items").insertAdjacentHTML("beforeend", entries.map(logItem).join(""));
-        document.getElementById("case-count").textContent = "Cases with public details (" + num(r.cases.length + entries.length) + ")";
+        updateCount(r);
       }, function () {});
   }
 
@@ -379,5 +384,8 @@
   show();
   fetch("data/crimelog/index.json", { cache: "no-cache" })
     .then(function (res) { return res.ok ? res.json() : {}; })
-    .then(function (idx) { applyLogIndex(idx); show(); }, function () {});
+    .then(function (idx) { logIdx = idx || {}; recount(); show(); }, function () {});
+  fetch("data/school-news/index.json", { cache: "no-cache" })
+    .then(function (res) { return res.ok ? res.json() : {}; })
+    .then(function (idx) { newsIdx = idx || {}; recount(); show(); }, function () {});
 })();
