@@ -170,3 +170,6 @@ table.yrs { border-collapse: collapse; font-size: .88rem; margin: 4px 0; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --t-news: #c3a0f0; } }
 :root[data-theme="dark"] { --t-news: #c3a0f0; }
 .t-news { background: var(--t-news); }
+.mug { margin: 6px 0 10px; }
+.mug img { display: block; width: 160px; max-width: 100%; height: auto; border-radius: 6px; border: 1px solid var(--border); }
+.mug figcaption { margin-top: 4px; }
