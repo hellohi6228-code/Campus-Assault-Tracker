@@ -26,6 +26,43 @@
   CLERY.campuses.forEach(function (c) { nameCount[c[0]] = (nameCount[c[0]] || 0) + 1; });
 
 
+  // Short names used in headlines, so news can be matched to a school.
+  var ALIASES = {
+    "Louisiana State University and Agricultural & Mechanical College": ["LSU"],
+    "University of California-Los Angeles": ["UCLA"],
+    "University of Southern California": ["USC"],
+    "Brigham Young University": ["BYU"],
+    "University of North Carolina at Chapel Hill": ["UNC", "Chapel Hill"],
+    "North Carolina State University at Raleigh": ["NC State", "N.C. State"],
+    "Ohio State University-Main Campus": ["Ohio State"],
+    "Pennsylvania State University-Main Campus": ["Penn State"],
+    "Michigan State University": ["Michigan State"],
+    "Florida State University": ["Florida State", "FSU"],
+    "California State University-San Marcos": ["Cal State San Marcos", "CSU San Marcos", "CSUSM"],
+    "University of California-Berkeley": ["UC Berkeley"],
+    "University of Michigan-Ann Arbor": ["University of Michigan"],
+    "Columbia University in the City of New York": ["Columbia"],
+    "Indiana University-Bloomington": ["Indiana University", "IU "],
+    "University of Utah": ["University of Utah", "U. of Utah", "U of U"],
+    "Texas A&M University-College Station": ["Texas A&M"]
+  };
+  function newsKeys(name) {
+    var keys = (ALIASES[name] || []).slice();
+    var base = name.split("-")[0].trim();
+    keys.push(base);
+    var m = base.match(/^(?:The )?([A-Z][\w.&' ]*?) (?:University|College)$/);
+    if (m && m[1].split(" ").length <= 2) keys.push(m[1]); // "Cornell University" -> "Cornell"
+    return keys.map(function (k) { return k.toLowerCase(); });
+  }
+  function newsFor(r) {
+    if (!NEWS) return [];
+    var keys = newsKeys(r.raw[0]);
+    return NEWS.items.filter(function (n) {
+      var t = n.t.toLowerCase();
+      return keys.some(function (k) { return t.indexOf(k) !== -1; });
+    });
+  }
+
   var rows = CLERY.campuses.map(function (c, i) {
     var rape = 0, total = 0;
     c[7].forEach(function (v) { rape += v[0]; total += v[0] + v[1] + v[2]; });
@@ -178,7 +215,13 @@
       '<button type="button" class="back" id="back">← Back to results</button>' +
       '<h2 class="school-h">' + esc(r.name) + "</h2>" +
       '<p class="muted small">' + esc(r.place) + " · " + num(r.total) + " sex offenses reported, " + span + " (" + num(r.rape) + " rape)</p>" +
-      (r.cases.length ? r.cases.map(caseHTML).join("") : '<p class="muted">No public cases on file for this school.</p>');
+      (r.cases.length ? r.cases.map(caseHTML).join("") : '<p class="muted">No public cases on file for this school.</p>') +
+      (function () {
+        var news = newsFor(r);
+        return news.length ? "<h4>News</h4><ul class=\"mini-news\">" + news.slice(0, 8).map(function (n) {
+          return '<li><a href="' + esc(n.u) + '" target="_blank" rel="noopener">' + esc(n.t) + '</a> <span class="muted small">' + esc(n.s) + " · " + fmtDate(n.d) + "</span></li>";
+        }).join("") + "</ul>" : "";
+      })();
     document.getElementById("back").addEventListener("click", goBack);
   }
 
