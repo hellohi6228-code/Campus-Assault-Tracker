@@ -8,9 +8,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          curl -sSL -A "Mozilla/5.0" https://ope.ed.gov/campussafety/public/js/app.min.7fc9908f.js -o f.js
-          grep -oE "[\"'][^\"']{0,80}(api|Api|API|File|file|\.ashx|\.aspx|/data)[^\"']{0,80}[\"']" f.js | sort -u | head -150
-          echo ======
-          grep -oE ".{200}Download Data File.{300}" f.js | head -3
-          echo ======
-          grep -oE ".{150}download\.bin.{150}" f.js | head -3
+          A=https://ope.ed.gov/campussafety/api
+          for e in dataFiles/years dataFiles/fileTypes dataFiles/fileList; do echo "== $e"; curl -sSL -A Mozilla/5.0 "$A/$e" | head -c 4000; echo; done
+          F=$(curl -sSL -A Mozilla/5.0 "$A/dataFiles/fileList" | grep -oE '[A-Za-z0-9_]*20(2[3-5])[A-Za-z0-9_]*\.zip' | sort -u | tail -3)
+          echo "candidates: $F"
+          for f in $F; do
+            curl -sSL -A Mozilla/5.0 "$A/dataFiles/file?fileName=$f" -o d.zip; ls -l d.zip; file d.zip
+            mkdir -p x && unzip -o -q d.zip -d x && ls -la x
+          done
+          pip install -q openpyxl xlrd pandas >/dev/null
+          python3 - <<'PY'
+          import glob, pandas as pd
+          for f in sorted(glob.glob('x/**/*', recursive=True)):
+              if f.lower().endswith(('.xls','.xlsx','.csv')) and 'crime' in f.lower():
+                  try:
+                      d = pd.read_csv(f, nrows=3, encoding='latin1') if f.lower().endswith('.csv') else pd.read_excel(f, nrows=3)
+                      print('##', f, d.shape); print(list(d.columns)); print(d.head(2).to_string()[:1500])
+                  except Exception as e: print('ERR', f, e)
+          PY
