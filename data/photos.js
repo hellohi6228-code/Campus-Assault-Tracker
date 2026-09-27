@@ -6,6 +6,12 @@ window.PHOTOS = {
   "page": "https://commons.wikimedia.org/wiki/File:Turner,_Brock_Allen%27s_mug_shot_taken_after_his_2015_arrest.webp",
   "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6c/Turner%2C_Brock_Allen%27s_mug_shot_taken_after_his_2015_arrest.webp/250px-Turner%2C_Brock_Allen%27s_mug_shot_taken_after_his_2015_arrest.webp"
  },
+ "Jacob Cohen": {
+  "credit": "Israel Wiesen",
+  "license": "Public domain",
+  "page": "https://commons.wikimedia.org/wiki/File:Salomon_Jacob_Cohen_(Published_in_1884).jpg",
+  "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c9/Salomon_Jacob_Cohen_%28Published_in_1884%29.jpg/250px-Salomon_Jacob_Cohen_%28Published_in_1884%29.jpg"
+ },
  "Jerry Sandusky": {
   "credit": "Washington High School",
   "license": "Public domain",
@@ -17,6 +23,12 @@ window.PHOTOS = {
   "license": "Public domain",
   "page": "https://commons.wikimedia.org/wiki/File:Larry_Nassar_2018_Voice_of_America.png",
   "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3b/Larry_Nassar_2018_Voice_of_America.png/250px-Larry_Nassar_2018_Voice_of_America.png"
+ },
+ "Pablo Herrera": {
+  "credit": "Miyagawa",
+  "license": "CC BY-SA 3.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Pablo_Herrera.JPG",
+  "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/49/Pablo_Herrera.JPG/250px-Pablo_Herrera.JPG"
  },
  "Richard Chan": {
   "credit": "梁柏堅（表弟） Pakkin Leung",
