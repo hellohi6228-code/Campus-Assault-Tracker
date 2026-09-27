@@ -27,16 +27,9 @@ def slug(name):
 # The site is behind a bot check, so we only read what an ordinary visitor sees: the first page (the
 # newest ~20 entries, all campuses). Running every few hours catches every new entry. The incident-number
 # prefix identifies the campus (e.g. 26UP04348 = University Park).
-PSU_PREFIX = {
+PSU_PREFIX = {  # only prefixes confirmed against entries' locations
     "UP": "Pennsylvania State University-Main Campus",
     "AB": "Pennsylvania State University-Penn State Abington",
-    "AA": "Pennsylvania State University-Penn State Altoona",
-    "BR": "Pennsylvania State University-Penn State Berks",
-    "BW": "Pennsylvania State University-Penn State Brandywine",
-    "ER": "Pennsylvania State University-Penn State Erie-Behrend College",
-    "HB": "Pennsylvania State University-Penn State Harrisburg",
-    "HN": "Pennsylvania State University-Penn State Hazleton",
-    "YK": "Pennsylvania State University-Penn State York",
 }
 # Campus names that appear in the LOCATION field, used when a prefix is not in PSU_PREFIX.
 PSU_LOCATION = {
