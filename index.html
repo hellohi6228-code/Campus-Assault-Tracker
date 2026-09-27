@@ -12,14 +12,15 @@
   <main class="wrap">
     <h1>Campus Assault Tracker</h1>
     <p class="lede" id="lede">Sex offenses reported by every US college to the federal government.</p>
+    <div class="big" id="big"></div>
 
     <div id="map" role="img" aria-label="Map of reported campus sex offenses"></div>
 
     <div class="controls">
       <input type="search" id="q" placeholder="Search any university, city, state or case…" aria-label="Search schools" autocomplete="off">
       <div class="toggle" role="group" aria-label="View">
-        <button type="button" data-view="schools" class="on">Universities</button>
-        <button type="button" data-view="cases">All cases</button>
+        <button type="button" data-view="schools" class="on">All reports by university</button>
+        <button type="button" data-view="cases">Court &amp; lawsuit records</button>
       </div>
     </div>
     <details class="process" id="process"><summary>How a sexual assault case moves through the legal system</summary><div id="process-body"></div></details>
