@@ -44,8 +44,9 @@ def slug(name):
     return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")[:80]
 
 
-FAMOUS_SHORT = {"Cornell", "Yale", "Stanford", "Harvard", "Duke", "Baylor", "Vanderbilt", "Dartmouth", "Princeton",
-                "Northwestern", "Georgetown", "Clemson", "Purdue", "Rutgers", "Tulane", "Emory", "Syracuse"}
+FAMOUS_SHORT = {"Cornell", "Yale", "Stanford", "Harvard", "Duke", "Baylor", "Vanderbilt", "Dartmouth",
+                "Northwestern", "Purdue", "Rutgers", "Tulane", "Emory"}
+# Not used as short names because they are also town names: Georgetown, Princeton, Syracuse, Clemson, Brown.
 
 
 _OWNERS = {}
