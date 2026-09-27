@@ -19,8 +19,9 @@ from collections import defaultdict
 import pandas as pd
 
 API = "https://ope.ed.gov/campussafety/api/dataFiles/file?fileName="
-# Each release covers three calendar years; together these span 2016-2024.
-RELEASES = ["Crime2019EXCEL.zip", "Crime2022EXCEL.zip", "Crime2025EXCEL.zip"]
+# Each release covers three calendar years. "Rape"/"fondling" categories exist from 2014 on (earlier years
+# used "forcible sex offenses" and are not comparable), so 2014-2024 is the full comparable history.
+RELEASES = ["Crime2016EXCEL.zip", "Crime2019EXCEL.zip", "Crime2022EXCEL.zip", "Crime2025EXCEL.zip"]
 GEOS = ["oncampuscrime", "noncampuscrime", "publicpropertycrime"]
 OFFENSES = ["RAPE", "FONDL", "INCES", "STATR"]
 IPEDS_DIRS = ["HD2024", "HD2023", "HD2022"]
@@ -97,7 +98,7 @@ def main():
 
     national = {y: [0, 0, 0, 0] for y in years}
     by_state = defaultdict(lambda: {y: 0 for y in years})
-    recent = years[-3:]
+    recent = years  # every year is stored per campus (the site shows all-time totals)
     out_campuses = []
     missing = 0
     for uid, info in campuses.items():
