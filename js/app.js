@@ -3,6 +3,7 @@
 
   var CLERY = window.CLERY || { campuses: [], recentYears: [], years: [], national: {} };
   var CASES = window.CASES || [];
+  var PROCESS = window.PROCESS || {};
 
   var STATUS_LABELS = {
     "conviction": "Criminal conviction",
@@ -103,7 +104,7 @@
         return "<b>" + esc(r.name) + "</b>" + esc(r.place) +
           "<br><b style='display:inline'>" + num(r.total) + "</b> reported sex offenses, " + span + " (" + num(r.rape) + " rape)" +
           "<br>Rank #" + r.rankTotal + " of " + num(rows.length) +
-          (r.cases.length ? "<br><b style='display:inline'>" + r.cases.length + " lawsuit/investigation on file</b>" : "") +
+          (r.cases.length ? "<br><b style='display:inline'>" + r.cases.map(function (k) { var t = primaryTrack(k); return esc(t ? stageLabel(t) : k.status); }).join("<br>") + "</b>" : "") +
           '<br><a href="#" data-show="' + r.i + '">Show in list ↓</a>';
       }).addTo(map);
     });
@@ -129,11 +130,41 @@
   var shown = 50;
   var open = {};
 
+  (function renderProcess() {
+    var html = '<p class="muted small">A case can move on up to four separate tracks at once. They are independent: prosecutors can decline charges while a civil lawsuit continues.</p><div class="tracks">';
+    Object.keys(PROCESS).forEach(function (key) {
+      var t = PROCESS[key];
+      html += '<div class="track-def"><h3>' + esc(t.label) + '</h3><p class="muted small">' + esc(t.who) + "</p><ol>" +
+        t.steps.map(function (s) { return "<li><b>" + esc(s[0]) + ".</b> " + esc(s[1]) + "</li>"; }).join("") + "</ol></div>";
+    });
+    document.getElementById("process-body").innerHTML = html + "</div>";
+  })();
+
+  // The track to summarize on the row: the first still-active track, else the first listed.
+  function primaryTrack(k) {
+    var tr = k.tracks || [];
+    return tr.filter(function (t) { return t.state === "active"; })[0] || tr[0];
+  }
+  function stageLabel(t) {
+    var P = PROCESS[t.track];
+    return P.label.replace(/ \(.*\)/, "") + ": " + (t.short || P.steps[t.step][0]);
+  }
+  function stepperHTML(t) {
+    var P = PROCESS[t.track];
+    var steps = P.steps.map(function (s, i) {
+      var cls = i < t.step ? "done" : i === t.step ? (t.state === "active" ? "now" : "end") : "todo";
+      return '<li class="' + cls + '" title="' + esc(s[1]) + '">' + esc(s[0]) + "</li>";
+    }).join("");
+    return '<div class="track"><div class="track-h"><b>' + esc(P.label) + '</b> <span class="state ' + t.state + '">' +
+      (t.state === "active" ? "● Active" : "Closed") + "</span> — " + esc(t.short || "") + '</div><ol class="stepper">' + steps + '</ol><p class="small">' + esc(t.note) + "</p></div>";
+  }
+
   function caseHTML(k) {
     var named = (k.named || []).map(function (p) { return "<b>" + esc(p.name) + "</b> — " + esc(p.basis); }).join("<br>");
     return '<div class="case"><div class="case-h"><span class="badge b-' + esc(k.statusCategory) + '">' + esc(STATUS_LABELS[k.statusCategory]) + "</span> " +
       "<b>" + esc(k.title) + "</b> <span class=\"muted\">(" + esc(k.year) + ")</span></div>" +
       "<p>" + esc(k.summary) + "</p>" +
+      (k.tracks || []).map(stepperHTML).join("") +
       "<p><b>Status:</b> " + esc(k.status) + (k.payout ? " · <b>Paid:</b> " + money(k.payout) : "") + "</p>" +
       (named ? "<p>" + named + "</p>" : "") +
       (k.namingNote ? '<p class="muted">' + esc(k.namingNote) + "</p>" : "") +
@@ -155,8 +186,12 @@
     var cols = 6 + years.length;
     var body = list.slice(0, shown).map(function (r) {
       var rank = sortKey === "rate" ? r.rankRate : r.rankTotal;
-      var flag = r.cases.length ? ' <button type="button" class="flag" data-toggle="' + r.i + '">' +
-        (r.cases.length === 1 ? "Lawsuit / investigation" : r.cases.length + " lawsuits / investigations") + (open[r.i] ? " ▲" : " ▼") + "</button>" : "";
+      var flag = r.cases.map(function (k) {
+        var t = primaryTrack(k);
+        var active = (k.tracks || []).some(function (x) { return x.state === "active"; });
+        return ' <button type="button" class="flag' + (active ? " live" : "") + '" data-toggle="' + r.i + '">' +
+          esc(t ? stageLabel(t) : STATUS_LABELS[k.statusCategory]) + (open[r.i] ? " ▲" : " ▼") + "</button>";
+      }).join("");
       var tr = '<tr id="row-' + r.i + '"><td class="n muted">' + rank + "</td>" +
         "<td><div class=\"school\">" + esc(r.name) + flag + '</div><div class="muted small">' + esc(r.place) + "</div></td>" +
         r.perYear.map(function (v) { return '<td class="n opt">' + num(v) + "</td>"; }).join("") +
