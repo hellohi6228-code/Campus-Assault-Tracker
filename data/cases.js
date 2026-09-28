@@ -3530,5 +3530,28 @@ window.CASES = [
     named: [],
     namingNote: "The charges were dismissed; this site does not name him.",
     sources: [{"label": "Newsweek", "url": "https://www.newsweek.com/ernest-suttles-university-memphis-rape-lawsuit-1453137"}, {"label": "Action News 5", "url": "https://www.actionnews5.com/story/36597307/memphis-football-player-charged-with-rape-dismissed-from-team/"}, {"label": "FOX13 Memphis", "url": "https://www.fox13memphis.com/top-stories/former-uofm-football-player-pleads-not-guilty-to-rape-charge/624711065/"}]
+  },
+  {
+    id: "rockymountain-2023",
+    school: "Rocky Mountain College",
+    city: "Billings",
+    state: "MT",
+    lat: 45.7965,
+    lng: -108.5541,
+    clery: "Rocky Mountain College|",
+    keywords: ["ski team", "Bozeman"],
+    year: 2023,
+    reported: 2024,
+    title: "Ski-team athlete charged with raping a woman in Bozeman",
+    type: "Student-perpetrated (athletics, off campus)",
+    summary: "A Rocky Mountain College athlete who competed on the ski team was charged with one count of aggravated sexual intercourse without consent over an alleged rape of a woman in Bozeman in September 2023. He was arrested in Billings, pleaded not guilty and was released on a $135,000 bond; the charge became public in March 2024.",
+    status: "Charged (2024); pleaded not guilty. No outcome reported in the sources found.",
+    statusCategory: "pending",
+    tracks: [{"track": "criminal", "step": 3, "state": "active", "short": "Charged; not guilty plea", "note": "Aggravated sexual intercourse without consent; $135,000 bond."}],
+    affected: 1,
+    payout: 0,
+    named: [],
+    namingNote: "He has been charged but not convicted; this site does not name him.",
+    sources: [{"label": "406 MT Sports", "url": "https://406mtsports.com/college/frontier-conference/rocky-mountain-college/rmc-athlete-accused-of-rape-in-bozeman/article_ff470aff-dc1b-5372-a365-9a246a7483dc.html"}, {"label": "Helena Independent Record", "url": "https://helenair.com/rocky-mountain-college-athlete-charged-with-rape/article_8d737360-2da8-5f5a-ae96-126e74a0fdd8.html"}, {"label": "KTVQ", "url": "https://www.ktvq.com/news/crime-watch/international-rocky-mountain-college-student-accused-of-rape-in-bozeman"}]
   }
 ];
