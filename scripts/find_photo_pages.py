@@ -80,8 +80,10 @@ def shows_person(url, name):
     except Exception:  # noqa: BLE001
         return None
     for src, text in p.found:
-        if depicts(src, text, first, last):
-            return text[:140]
+        if src.startswith("data:"):
+            src, text = "", text.split("data:")[0]    # lazy-load placeholder, not the picture
+        if depicts(src, text, first, last, name):
+            return {"why": re.sub(r"https?://\S+|//\S+", "", text).strip()[:160], "img": urllib.parse.urljoin(url, src)[:500]}
     return None
 
 
@@ -89,10 +91,10 @@ def shows_person(url, name):
 # "X (left)", "X mugshot"), never when it just tells the story ("X was convicted at the courthouse" is
 # usually a photo of the courthouse).
 DEPICTS = r"appears?|is (?:led|escorted|seen|shown|pictured|taken)|as he|plays?|sits?|stands?|walks?|listens?|looks?|enters?|leaves?|speaks?|pictured|\((?:left|right|center)\)|mug ?shot|booking (?:photo|image)|jail photo"
-STORY = r"convict|sentenc|guilty|charge|settle|lawsuit|rape|assault|court|case"
+LABEL = {"mugshot", "mug", "shot", "booking", "photo", "headshot", "file", "jr", "sr", "ii", "iii", "former", "is", "seen", "in", "a"}
 
 
-def depicts(src, text, first, last):
+def depicts(src, text, first, last, full=""):
     norm = lambda x: urllib.parse.unquote(x).lower().replace("-", " ").replace("_", " ")
     files = []
     for u in [src] + urllib.parse.parse_qs(urllib.parse.urlparse(src).query).get("url", []) if src else []:
@@ -104,8 +106,9 @@ def depicts(src, text, first, last):
     t = norm(re.sub(r"https?://\S+|\S+\.(?:jpe?g|png|webp|gif)\b", "", text, flags=re.I)).strip()
     if not re.search(r"\b" + re.escape(last) + r"\b", t):
         return False
-    if len(re.sub(r"\([^)]*\)", "", t).split()) <= 6 and re.search(r"\b" + re.escape(first) + r"\b", t) and not re.search(STORY, t):
-        return True                                   # a bare name label: "Jaylen King", "X (County Jail)"
+    rest = set(re.sub(r"\([^)]*\)|[^\w\s']", " ", t).split()) - set(re.sub(r"[^\w\s']", " ", " ".join([first, last, norm(full)])).split())
+    if re.search(r"\b" + re.escape(first) + r"\b", t) and rest <= LABEL:
+        return True                                   # a bare name label: "Jaylen King", "X mugshot", "X (County Jail)"
     lead = t.split(". ")[0]                           # first sentence of the caption, with them as its subject
     return bool(re.search(r"\b" + re.escape(last) + r"\b", " ".join(lead.split()[:6])) and re.search(r"(?<!\w)(?:" + DEPICTS + r")(?!\w)", lead))
 
@@ -128,10 +131,10 @@ def main():
     links = {}
     for name, urls in people.items():
         for u in extra.get(name, []) + urls:
-            why = shows_person(u, name)
-            if why:
-                links[name] = {"url": u, "why": why}
-                print(f"{name}: {u}  [{why}]", file=sys.stderr)
+            hit = shows_person(u, name)
+            if hit:
+                links[name] = {"url": u, **hit}
+                print(f"{name}: {u}  [{hit['why']}] {hit['img']}", file=sys.stderr)
                 break
         else:
             print(f"{name}: no page with a photo of them found", file=sys.stderr)

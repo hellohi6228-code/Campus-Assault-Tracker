@@ -23,5 +23,6 @@ jobs:
           git add data/photos.js data/photo-links.json; if [ -d data/photos ]; then git add data/photos; fi
           git diff --cached --quiet && exit 0
           git commit -m "Update photos of convicted individuals"
-          git pull --rebase
+          # A conflict means main changed the photo inputs after this run started; that change starts its own run.
+          git pull --rebase || { git rebase --abort; echo "main moved on; the newer run writes the photo list"; exit 0; }
           git push
