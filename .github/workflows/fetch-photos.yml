@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]   # one writer for data/photos.js, so branch and main never conflict
-    paths: [scripts/fetch_photos.py, data/cases.js, data/official-photos.json, .github/workflows/fetch-photos.yml]
+    paths: [scripts/fetch_photos.py, scripts/find_photo_pages.py, data/photo-pages-extra.json, data/cases.js, data/official-photos.json, .github/workflows/fetch-photos.yml]
 permissions:
   contents: write
 concurrency: { group: photos, cancel-in-progress: false }
@@ -15,11 +15,12 @@ jobs:
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
       - run: python scripts/fetch_photos.py
+      - run: python scripts/find_photo_pages.py
       - name: Commit photo list
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898208+github-actions[bot]@users.noreply.github.com"
-          git add data/photos.js; if [ -d data/photos ]; then git add data/photos; fi
+          git add data/photos.js data/photo-links.json; if [ -d data/photos ]; then git add data/photos; fi
           git diff --cached --quiet && exit 0
           git commit -m "Update photos of convicted individuals"
           git pull --rebase

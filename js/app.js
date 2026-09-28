@@ -168,7 +168,8 @@
         (ph ? '<figure class="mug"><img src="' + esc(ph.src) + '" alt="' + esc(p.name) + '" loading="lazy">' +
           '<figcaption class="muted small"><a href="' + esc(ph.page) + '" target="_blank" rel="noopener">Photo</a>: ' +
           esc(ph.credit) + " · " + esc(ph.license) + "</figcaption></figure>" : "") +
-        (p.photo && !ph ? ' · <a href="' + esc(p.photo) + '" target="_blank" rel="noopener">News coverage ↗</a>' : "") +
+        (!ph && photoLinks[p.name] ? ' · <a href="' + esc(photoLinks[p.name].url) + '" target="_blank" rel="noopener"><b>Photo ↗</b></a>' :
+          p.photo && !ph ? ' · <a href="' + esc(p.photo) + '" target="_blank" rel="noopener">News coverage ↗</a>' : "") +
         (p.registry === false ? "" : ' · <a href="https://www.nsopw.gov/search-public-sex-offender-registries" target="_blank" rel="noopener">Sex offender registry ↗</a>');
     }).join("<br>");
     return '<details class="item"><summary>' + badge(t ? TRACK_CLASS[t.track] : "t-fed", statusWord(t)) +
@@ -340,6 +341,7 @@
   }
 
   // ---- New finds: the newest stories and crime-log reports across all schools (data/new-finds.json) ----
+  var photoLinks = {};
   var finds = [], findPos = 0, findTimer = null, findPaused = false;
   var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   function findHTML(f) {
@@ -529,6 +531,10 @@
   fetch("data/crimelog/index.json", { cache: "no-cache" })
     .then(function (res) { return res.ok ? res.json() : {}; })
     .then(function (idx) { logIdx = idx || {}; recount(); show(); }, function () {});
+  // Pages verified (by scripts/find_photo_pages.py) to show a convicted person's photo; linked, not copied.
+  fetch("data/photo-links.json", { cache: "no-cache" })
+    .then(function (res) { return res.ok ? res.json() : {}; })
+    .then(function (d) { photoLinks = d || {}; if (current) show(); }, function () {});
   fetch("data/new-finds.json", { cache: "no-cache" })
     .then(function (res) { return res.ok ? res.json() : []; })
     .then(function (list) { finds = list || []; if (!current) renderFinds(q.value.trim().toLowerCase()); }, function () {});
