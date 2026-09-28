@@ -168,7 +168,7 @@
         (ph ? '<figure class="mug"><img src="' + esc(ph.src) + '" alt="' + esc(p.name) + '" loading="lazy">' +
           '<figcaption class="muted small"><a href="' + esc(ph.page) + '" target="_blank" rel="noopener">Photo</a>: ' +
           esc(ph.credit) + " · " + esc(ph.license) + "</figcaption></figure>" : "") +
-        (p.photo && !ph ? ' · <a href="' + esc(p.photo) + '" target="_blank" rel="noopener">Photo &amp; coverage ↗</a>' : "") +
+        (p.photo && !ph ? ' · <a href="' + esc(p.photo) + '" target="_blank" rel="noopener">News coverage ↗</a>' : "") +
         (p.registry === false ? "" : ' · <a href="https://www.nsopw.gov/search-public-sex-offender-registries" target="_blank" rel="noopener">Sex offender registry ↗</a>');
     }).join("<br>");
     return '<details class="item"><summary>' + badge(t ? TRACK_CLASS[t.track] : "t-fed", statusWord(t)) +
