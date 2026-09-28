@@ -49,6 +49,11 @@ FAMOUS_SHORT = {"Cornell", "Yale", "Stanford", "Harvard", "Duke", "Baylor", "Van
 # Not used as short names because they are also town names: Georgetown, Princeton, Syracuse, Clemson, Brown.
 
 
+def normalize_name(name):
+    """Federal releases spell some names two ways ("Texas A & M" / "Texas A&M"); use the press spelling."""
+    return re.sub(r"\b(\w) & (\w)\b", r"\1&\2", name)
+
+
 _OWNERS = {}
 
 
@@ -66,6 +71,7 @@ def head_owner(head):
 
 def search_names(inst):
     """Names the press uses for a school, most specific first. Headlines must contain one of them."""
+    inst = normalize_name(inst)
     head, _, tail = inst.partition("-")
     head, tail = head.strip(), tail.strip()
     names = []
@@ -97,8 +103,11 @@ def name_pattern(names):
     "Washington state man" or "Brown County" don't count as the school."""
     full = [n for n in names if len(n.split()) > 2 or "University" in n or "College" in n]
     short = [n for n in names if n not in full]
-    parts = ["(?i:%s)" % "|".join(re.escape(n) for n in full)] if full else []
-    parts += [r"\b%s\b" % re.escape(n) for n in short]
+    # "West Texas A&M University" or "Northern Arizona University" are different schools.
+    not_prefixed = r"(?<!West )(?<!East )(?<!North )(?<!South )(?<!Central )(?<!Northern )(?<!Southern )(?<!Eastern )(?<!Western )"
+    esc = lambda n: re.escape(n).replace("\\ ", r"[\s\-\u2010-\u2014]")   # "Carson Newman" matches "Carson-Newman"
+    parts = [not_prefixed + "(?i:%s)" % "|".join(esc(n) for n in full)] if full else []
+    parts += [not_prefixed + r"\b%s\b(?![-\u2010-\u2014])" % esc(n) for n in short]   # "Texas A&M-Kingsville" is another school
     return re.compile("|".join(parts))
 
 

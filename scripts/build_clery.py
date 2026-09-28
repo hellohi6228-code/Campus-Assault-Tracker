@@ -89,7 +89,8 @@ def main():
                 uid = int(r["UNITID_P"])
                 if uid not in campuses:   # newest release's name, city and enrollment
                     campuses[uid] = {
-                        "name": str(r["INSTNM"]).strip(),
+                        # Releases spell some names two ways ("Texas A & M" / "Texas A&M"); keep one so records merge.
+                        "name": re.sub(r"\b(\w) & (\w)\b", r"\1&\2", str(r["INSTNM"]).strip()),
                         "branch": str(r.get("BRANCH") or "").strip(),
                         "city": str(r.get("City") or "").strip().title(),
                         "state": str(r.get("State") or "").strip(),
