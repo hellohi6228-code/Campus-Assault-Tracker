@@ -1,9 +1,29 @@
 {
- "Alec Cook": ["https://madison.com/alec-cook-arrives/image_86413be8-a55f-5764-8784-65ea8702d617.html"],
- "Bilguun Enkhbayar": ["https://www.wwnytv.com/2025/11/25/former-cornell-student-convicted-rapeburglary-charges/"],
- "Tevin Elliott": ["https://en.wikipedia.org/wiki/Tevin_Elliot", "https://wacotrib.com/news/courts_and_trials/ex-bu-football-player-gets-years-in-sexual-assaults/article_0e8c23fa-44cc-59da-a134-de9fe39a7d5e.html"],
- "Brandon Vandenburg": ["https://www.si.com/college/2015/02/09/vanderbilt-rape-case-brandon-vandenburg-cory-batey"],
- "Cory Batey": ["https://www.si.com/college/2015/02/09/vanderbilt-rape-case-brandon-vandenburg-cory-batey"],
- "James Heaps": ["https://en.wikipedia.org/wiki/James_M._Heaps"],
- "George Tyndall": ["https://en.wikipedia.org/wiki/George_Tyndall"]
+ "Alec Cook": [
+  "https://madison.com/alec-cook-arrives/image_86413be8-a55f-5764-8784-65ea8702d617.html"
+ ],
+ "Bilguun Enkhbayar": [
+  "https://www.wwnytv.com/2025/11/25/former-cornell-student-convicted-rapeburglary-charges/",
+  "https://ithacavoice.org/2025/11/former-cornell-student-convicted-of-2024-campus-rape/",
+  "https://www.cornellsun.com/article/2026/02/former-cornell-student-sentenced-to-eight-years-for-2024-on-campus-rape",
+  "https://www.ithaca.com/news/ithaca/former-cornell-student-convicted-of-rape-burglary-in-dorm-room-assault-case/article_c619255b-e27f-4d82-9805-7d940e5ca0ea.html",
+  "https://cnycentral.com/news/local/former-cornell-student-convicted-of-rape-of-physically-helpless-person-university-jury-burglary-sentencing-crimes-wstm-wtvh",
+  "https://www.14850.com/112543785-rape-burglary-conviction-2511/"
+ ],
+ "Brandon Vandenburg": [
+  "https://www.si.com/college/2015/02/09/vanderbilt-rape-case-brandon-vandenburg-cory-batey"
+ ],
+ "Cory Batey": [
+  "https://www.si.com/college/2015/02/09/vanderbilt-rape-case-brandon-vandenburg-cory-batey"
+ ],
+ "George Tyndall": [
+  "https://en.wikipedia.org/wiki/George_Tyndall"
+ ],
+ "James Heaps": [
+  "https://en.wikipedia.org/wiki/James_M._Heaps"
+ ],
+ "Tevin Elliott": [
+  "https://en.wikipedia.org/wiki/Tevin_Elliot",
+  "https://wacotrib.com/news/courts_and_trials/ex-bu-football-player-gets-years-in-sexual-assaults/article_0e8c23fa-44cc-59da-a134-de9fe39a7d5e.html"
+ ]
 }

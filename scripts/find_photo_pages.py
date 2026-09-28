@@ -2,8 +2,8 @@
 so the site can link straight to it. Writes data/photo-links.json: {name: {"url": page, "why": evidence}}.
 
 Candidate pages: the person's coverage link, every source cited on their case, and Wikipedia articles about them.
-A page counts only if it has an image whose alt text, caption, title or file name contains the person's surname
-(or first + last name), or the words "mugshot"/"booking photo" next to the surname. Pages are only linked, never
+A page counts only if one of its images is named after the person, is labelled with just their name, or has a caption
+saying the picture shows them ("X appears in court", "X mugshot"); a caption that only tells the story doesn't count. Pages are only linked, never
 copied. Run: python scripts/find_photo_pages.py   (needs network access)
 """
 import json
@@ -80,10 +80,34 @@ def shows_person(url, name):
     except Exception:  # noqa: BLE001
         return None
     for src, text in p.found:
-        t = urllib.parse.unquote(text).lower().replace("-", " ").replace("_", " ")
-        if last in t and (first in t or re.search(r"mug ?shot|booking|arrest|sentenc|court|photo", t)):
+        if depicts(src, text, first, last):
             return text[:140]
     return None
+
+
+# A caption only counts when it describes what the picture shows ("X appears in court", "X is led away",
+# "X (left)", "X mugshot"), never when it just tells the story ("X was convicted at the courthouse" is
+# usually a photo of the courthouse).
+DEPICTS = r"appears?|is (?:led|escorted|seen|shown|pictured|taken)|as he|plays?|sits?|stands?|walks?|listens?|looks?|enters?|leaves?|speaks?|pictured|\((?:left|right|center)\)|mug ?shot|booking (?:photo|image)|jail photo"
+STORY = r"convict|sentenc|guilty|charge|settle|lawsuit|rape|assault|court|case"
+
+
+def depicts(src, text, first, last):
+    norm = lambda x: urllib.parse.unquote(x).lower().replace("-", " ").replace("_", " ")
+    files = []
+    for u in [src] + urllib.parse.parse_qs(urllib.parse.urlparse(src).query).get("url", []) if src else []:
+        files.append(urllib.parse.urlparse(u).path.rsplit("/", 1)[-1])   # image CDNs often wrap the real file in ?url=
+    files += re.findall(r"[\w.%-]+\.(?:jpe?g|png|webp|gif)\b", text, re.I)
+    for f in map(norm, files):
+        if re.search(r"\b" + re.escape(last) + r"\b", f) or (len(last) >= 5 and last in f.replace(" ", "")):
+            return True                               # the image file itself is named after them
+    t = norm(re.sub(r"https?://\S+|\S+\.(?:jpe?g|png|webp|gif)\b", "", text, flags=re.I)).strip()
+    if not re.search(r"\b" + re.escape(last) + r"\b", t):
+        return False
+    if len(re.sub(r"\([^)]*\)", "", t).split()) <= 6 and re.search(r"\b" + re.escape(first) + r"\b", t) and not re.search(STORY, t):
+        return True                                   # a bare name label: "Jaylen King", "X (County Jail)"
+    lead = t.split(". ")[0]                           # first sentence of the caption, with them as its subject
+    return bool(re.search(r"\b" + re.escape(last) + r"\b", " ".join(lead.split()[:6])) and re.search(r"(?<!\w)(?:" + DEPICTS + r")(?!\w)", lead))
 
 
 def main():
