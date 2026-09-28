@@ -64,6 +64,16 @@ def main():
         json.dump(index, f, ensure_ascii=False, separators=(",", ":"))
     with open("data/new-finds.json", "w") as f:
         json.dump(new_finds(sorted(slugs)), f, ensure_ascii=False, separators=(",", ":"))
+    # Guard: every school's list count must equal the stories that open for it.
+    idx = json.load(open("data/school-news/index.json"))
+    wrong = []
+    for name, n in idx.items():
+        path = os.path.join("data/school-news", re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")[:80] + ".json")
+        shown = len([x for x in json.load(open(path)) if "case" not in x]) if os.path.exists(path) else 0
+        if shown != n:
+            wrong.append(f"{name}: index {n}, file {shown}")
+    if wrong:
+        raise SystemExit("news counts do not match files:\n" + "\n".join(wrong))
     print(f"search index: {len(index)} schools, {sum(t.count(chr(10)) + 1 for t in index.values())} lines", flush=True)
 
 

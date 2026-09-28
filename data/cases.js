@@ -24,9 +24,9 @@ window.CASES = [
     year: 2024, reported: 2026,
     title: "Alleged drugging and group sexual assault at Chi Phi fraternity house",
     type: "Student-on-student (fraternity)",
-    summary: "A former student alleges she was given ketamine and sexually assaulted for hours at the Chi Phi house in October 2024, and that a member invited others via a Snapchat group chat. Civil suit filed September 2026 in NY Supreme Court against Cornell, Chi Phi, related Greek organizations and seven current/former members. Cornell says its Office of Civil Rights investigated; reporting indicates two students were expelled. The chapter remains barred from campus.",
-    status: "Civil lawsuit pending (filed Sept 2026). Tompkins County DA found insufficient evidence for criminal charges; no arrests.",
-    tracks: [{"track": "civil", "step": 0, "state": "active", "note": "Filed Sept 2026 against Cornell, Chi Phi, related organizations and seven members. Defendants have not yet answered.", "short": "Lawsuit filed; awaiting response"}, {"track": "criminal", "step": 2, "state": "closed", "note": "Tompkins County DA declined to charge: insufficient evidence. No arrests.", "short": "No charges filed"}, {"track": "campus", "step": 3, "state": "closed", "note": "Formal Title IX complaint January 2025; at least 12 hearings in May 2025. According to the lawsuit, two students were expelled and the rest received suspensions, workshops or the option to write an essay. The chapter is barred from campus. A presidential task force issued campus sexual-assault recommendations in March 2026.", "short": "Discipline issued"}],
+    summary: "A former student alleges she was given ketamine and sexually assaulted for hours at the Chi Phi house in October 2024, and that a member invited others via a Snapchat group chat. Civil suit filed September 2026 in NY Supreme Court against Cornell, Chi Phi, related Greek organizations and seven current/former members. Cornell says its Office of Civil Rights investigated; reporting indicates two students were expelled. The chapter remains barred from campus. On September 28, 2026 Tompkins County District Attorney Matthew Van Houten reopened the criminal investigation, saying he intends to present the case to a grand jury with the woman's cooperation to see whether evidence not known in November 2024 changes his office's assessment; he said the lawsuit's account differs from her 2024 statement to police.",
+    status: "Criminal investigation REOPENED by the Tompkins County DA (Sept 28, 2026), who plans to present the case to a grand jury. Civil lawsuit pending (filed Sept 2026).",
+    tracks: [{"track": "civil", "step": 0, "state": "active", "note": "Filed Sept 2026 against Cornell, Chi Phi, related organizations and seven members. Defendants have not yet answered.", "short": "Lawsuit filed; awaiting response"}, {"track": "criminal", "step": 1, "state": "active", "note": "Declined in Nov 2024 for insufficient evidence; reopened Sept 28, 2026 after the lawsuit. The DA intends to present the case to the Tompkins County grand jury with the woman's cooperation to see whether new evidence changes the assessment.", "short": "Investigation reopened"}, {"track": "campus", "step": 3, "state": "closed", "note": "Formal Title IX complaint January 2025; at least 12 hearings in May 2025. According to the lawsuit, two students were expelled and the rest received suspensions, workshops or the option to write an essay. The chapter is barred from campus. A presidential task force issued campus sexual-assault recommendations in March 2026.", "short": "Discipline issued"}],
     statusCategory: "pending",
     affected: 1, payout: 0,
     named: [],
@@ -37,7 +37,10 @@ window.CASES = [
       { label: "Cornell Daily Sun editorial", url: "https://www.cornellsun.com/article/2026/09/editorial-cornell-won-t-we-will" },
       { label: "WBNG", url: "https://www.wbng.com/2026/09/22/cornell-university-fraternity-sued-by-student-after-alleged-gang-rape-drugging-2024/" },
       { label: "Law Commentary (lawsuit details)", url: "https://www.lawcommentary.com/articles/cornell-fraternity-gang-rape-lawsuit-essay-discipline" },
-      { label: "Cornell Daily Sun (Sept 2026)", url: "https://www.cornellsun.com/article/2026/09/university-releases-statement-on-alleged-gang-rape-at-chi-phi" }
+      { label: "Cornell Daily Sun (Sept 2026)", url: "https://www.cornellsun.com/article/2026/09/university-releases-statement-on-alleged-gang-rape-at-chi-phi" },
+      { label: "Cornell Daily Sun (DA reopens case)", url: "https://www.cornellsun.com/article/2026/09/tompkins-county-da-reopens-criminal-investigation-into-alleged-chi-phi-gang-rape" },
+      { label: "ABC News (DA reopens case)", url: "https://abcnews.com/US/district-attorney-reopens-case-alleged-cornell-university-gang/story?id=136806149" },
+      { label: "CNN", url: "https://www.cnn.com/2026/09/28/us/cornell-university-sexual-assault-lawsuit-hnk" }
     ]
   },
   {
