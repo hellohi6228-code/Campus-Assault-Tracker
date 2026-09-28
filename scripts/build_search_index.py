@@ -50,9 +50,31 @@ def new_finds(slugs, limit=20):
                     continue
                 finds.append({"k": "log", "t": e.get("nature") or ", ".join(e.get("offenses", [])),
                               "s": "Campus police crime log", "d": d, "slug": slug})
-    finds = [dict(f, school=names.get(f["slug"], "")) for f in finds]
+    # National feed (data/news.js, refreshed every 6 hours): newest headlines, linked to the school they name.
+    if os.path.exists("data/news.js"):
+        from fetch_school_news import load_institutions, name_pattern, search_names
+        src = open("data/news.js").read()
+        items = json.loads(src[src.index("{"): src.rindex("}") + 1]).get("items", [])
+        pats = [(n, name_pattern(search_names(n))) for n in load_institutions()[:600]]
+        seen = {re.sub(r"[^a-z0-9]", "", f["t"].lower())[:60] for f in finds}
+        for x in items:
+            key = re.sub(r"[^a-z0-9]", "", x["t"].lower())[:60]
+            if key in seen:
+                continue
+            seen.add(key)
+            inst = next((n for n, p in pats if p.search(x["t"])), "")
+            finds.append({"k": "news", "t": x["t"], "s": x.get("s", ""), "u": x["u"], "d": x["d"],
+                          "slug": re.sub(r"[^a-z0-9]+", "-", inst.lower()).strip("-")[:80] if inst else ""})
+    finds = [dict(f, school=names.get(f["slug"], "")) for f in finds if f["slug"]]
     finds.sort(key=lambda f: -f["d"])
-    return finds[:limit]
+    # One story per school per day, so several outlets covering the same story don't fill the box.
+    out, seen = [], set()
+    for f in finds:
+        key = (f["slug"], f["d"] // 86400)
+        if key not in seen:
+            seen.add(key)
+            out.append(f)
+    return out[:limit]
 
 
 def main():

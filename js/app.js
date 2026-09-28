@@ -336,7 +336,6 @@
         (trackFilter ? " with " + TRACK_NAME[trackFilter] + " on file" : "") + " (" + span + ")."
       : num(nationalTotal) + " sex offenses reported to the federal government by US colleges (" + span + ")." + pendingNote;
     document.getElementById("more").hidden = list.length <= shown;
-    renderNews(term);
     renderFinds(term);
   }
 
@@ -469,7 +468,7 @@
   function show() {
     var m = location.hash.match(/^#school-(\d+)$/);
     var r = m ? rows[+m[1]] : null;
-    var listEls = ["finds", "process", "count", "results", "more", "news-section"];
+    var listEls = ["finds", "process", "count", "results", "more"];
     if (r) {
       if (!current) listScroll = window.scrollY;
       current = r;
@@ -509,24 +508,13 @@
   });
 
   // ---- Latest news (refreshed every 6 hours by a GitHub Action) ----
-  var newsShown = 15;
-  function renderNews(term) {
-    if (!NEWS) { document.getElementById("news-section").hidden = true; return; }
-    var list = !term ? NEWS.items : NEWS.items.filter(function (n) { return matches(n.t + " " + n.s, term); });
-    document.getElementById("news").innerHTML = list.slice(0, newsShown).map(function (n) {
-      return '<li><a href="' + esc(n.u) + '" target="_blank" rel="noopener">' + esc(n.t) + '</a><div class="muted small">' + esc(n.s) + " · " + fmtDate(n.d) + "</div></li>";
-    }).join("") || '<li class="muted">No recent news matches “' + esc(term) + "”.</li>";
-    document.getElementById("news-meta").textContent = "Headlines as published by each outlet; allegations in them are unproven unless a court has ruled. Updated " +
-      new Date(NEWS.updated * 1000).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) + ".";
-    document.getElementById("news-more").hidden = list.length <= newsShown;
-  }
+
 
   q.addEventListener("input", function () {
-    shown = 50; newsShown = 15;
+    shown = 50;
     if (current) { history.replaceState(null, "", location.pathname + location.search); show(); } else renderList();
   });
   document.getElementById("more").addEventListener("click", function () { shown += 100; renderList(); });
-  document.getElementById("news-more").addEventListener("click", function () { newsShown += 20; renderNews(q.value.trim().toLowerCase()); });
   show();
   fetch("data/crimelog/index.json", { cache: "no-cache" })
     .then(function (res) { return res.ok ? res.json() : {}; })
