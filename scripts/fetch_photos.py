@@ -58,12 +58,19 @@ def article_images(title):
     return [i["title"].split(":", 1)[1] for i in (pages[0].get("images", []) if pages else [])]
 
 
-def about_case(title):
-    """True if the Wikipedia article is about a sexual-abuse case (so a same-named person is never used)."""
-    d = api("en.wikipedia.org", action="query", prop="extracts", exintro=1, explaintext=1, titles=title, redirects=1)
+GENERIC = {"university", "college", "state", "institute", "community", "school", "main", "campus"}
+
+
+def about_case(title, schools):
+    """True only if the Wikipedia article is about a sexual-abuse case AND mentions the person's school, so a
+    same-named person (or a different case) is never used."""
+    d = api("en.wikipedia.org", action="query", prop="extracts", explaintext=1, titles=title, redirects=1)
     pages = d.get("query", {}).get("pages", [])
     text = pages[0].get("extract", "") if pages and not pages[0].get("missing") else ""
-    return bool(re.search(r"\b(rape|raping|sexual(ly)? (assault|abuse|abused|battery|misconduct)|sex offender|molest)", text, re.I))
+    if not re.search(r"\b(rape|raping|sexual(ly)? (assault|abuse|abused|battery|misconduct)|sex offender|molest)", text, re.I):
+        return False
+    words = {w for sc in schools for w in re.findall(r"[A-Za-z&]{4,}", sc) if w.lower() not in GENERIC and w not in ("of", "the")}
+    return any(re.search(r"\b%s\b" % re.escape(w), text) for w in words)
 
 
 def names_person(filename, name):
@@ -88,11 +95,13 @@ def download_official(name, entry):
 def main():
     out = subprocess.run(["node", "-e", 'global.window={};require("./data/cases.js");process.stdout.write(JSON.stringify(window.CASES))'],
                          capture_output=True, text=True, check=True).stdout
-    names = []
+    names, schools = [], {}
     for c in json.loads(out):
         for n in c.get("named", []):
-            if re.search(r"convict|guilty", n.get("basis", ""), re.I) and n["name"] not in names:
-                names.append(n["name"])
+            if re.search(r"convict|guilty|plea", n.get("basis", ""), re.I):
+                if n["name"] not in names:
+                    names.append(n["name"])
+                schools.setdefault(n["name"], []).append(c["school"])
     official = json.load(open("data/official-photos.json")) if os.path.exists("data/official-photos.json") else {}
     photos = {}
     for name in names:
@@ -108,7 +117,7 @@ def main():
         candidates = []
         for title in [name] + EXTRA_TITLES.get(name, []):
             try:
-                if about_case(title):
+                if about_case(title, schools.get(name, [])):
                     candidates += [lead_image(title)] + article_images(title)
                 else:
                     print(f"{name}: article {title!r} missing or not about the case; skipped", file=sys.stderr)
