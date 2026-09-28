@@ -355,9 +355,8 @@
     if (!n) return;
     findPos = (i + n) % n;
     var el = document.getElementById("finds-list");
-    el.classList.remove("in"); void el.offsetWidth;   // restart the fade
-    el.innerHTML = findHTML(finds[findPos]);
-    el.classList.add("in");
+    if (el.children.length !== n) el.innerHTML = finds.slice(0, n).map(findHTML).join("");
+    for (var k = 0; k < n; k++) el.children[k].classList.toggle("on", k === findPos);
     document.getElementById("finds-pos").textContent = (findPos + 1) + " / " + n;
   }
   function startFinds() {
