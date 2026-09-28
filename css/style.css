@@ -180,13 +180,13 @@ table.yrs { border-collapse: collapse; font-size: .88rem; margin: 4px 0; }
 .finds h2 { font-size: .95rem; margin: 0; }
 .finds-nav { display: flex; align-items: center; gap: 6px; }
 .finds-nav button { border: 1px solid var(--border); background: transparent; color: inherit; border-radius: 6px; width: 28px; height: 28px; font-size: 1.1rem; line-height: 1; cursor: pointer; }
-/* Fixed size: every item takes exactly the same space, so the box never changes height as it rotates. */
-.finds-slide { height: 4.6em; margin-top: 6px; overflow: hidden; line-height: 1.35; }
-.find .muted.small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.finds-slide.in { animation: finds-in .35s ease; }
+/* All items share one grid cell, so the box is as tall as the longest item: nothing is cut off and the size never changes as it rotates. */
+.finds-slide { display: grid; margin-top: 6px; line-height: 1.35; }
+.finds-slide > .find { grid-area: 1 / 1; visibility: hidden; }
+.finds-slide > .find.on { visibility: visible; animation: finds-in .35s ease; }
 @keyframes finds-in { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: none; } }
-@media (prefers-reduced-motion: reduce) { .finds-slide.in { animation: none; } }
-.find-t { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; height: 2.7em; }
+@media (prefers-reduced-motion: reduce) { .finds-slide > .find.on { animation: none; } }
+.find-t { overflow-wrap: anywhere; }
 .find .st { margin-bottom: 2px; }
 .filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 4px; }
 .chip { border: 1px solid var(--border); background: transparent; color: inherit; border-radius: 999px; padding: 6px 12px; font-size: .85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
