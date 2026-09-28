@@ -201,11 +201,14 @@
   var firstRow = {};
   rows.forEach(function (r) { if (!(r.raw[0] in firstRow)) firstRow[r.raw[0]] = r; r.logCount = 0; r.newsCount = 0; r.count = r.cases.length; });
   var logIdx = {}, newsIdx = {};
+  var newsBySlug = {};
   function recount() {
+    newsBySlug = {};
+    Object.keys(newsIdx).forEach(function (k) { newsBySlug[slug(k)] = newsIdx[k]; });
     Object.keys(firstRow).forEach(function (name) {
       var r = firstRow[name];
       r.logCount = logIdx[slug(name)] || 0;
-      r.newsCount = newsIdx[name] || 0;
+      r.newsCount = newsIdx[name] || newsBySlug[slug(name)] || 0;   // names can differ in spelling ("A & M" / "A&M")
       r.count = r.cases.length + r.logCount + r.newsCount;
     });
   }

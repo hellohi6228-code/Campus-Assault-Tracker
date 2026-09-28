@@ -2,8 +2,8 @@
 data/photos.js: window.PHOTOS = {name: {"src", "page", "credit", "license"}}.
 
 Sources, in order: government-released photos listed in data/official-photos.json (public records, copied into
-data/photos/), then any freely licensed image (public domain, CC0, CC BY, CC BY-SA) on Wikimedia Commons or in
-the person's Wikipedia articles whose file name names them. News-agency photos are never copied.
+data/photos/), then a freely licensed image (public domain, CC0, CC BY, CC BY-SA) from a Wikipedia article about
+the person's case whose file name names them. News-agency photos are never copied.
 Run: python scripts/fetch_photos.py   (needs network access to wikipedia.org and wikimedia.org)
 """
 import html
@@ -58,9 +58,12 @@ def article_images(title):
     return [i["title"].split(":", 1)[1] for i in (pages[0].get("images", []) if pages else [])]
 
 
-def commons_search(name):
-    d = api("commons.wikimedia.org", action="query", list="search", srsearch=f'"{name}"', srnamespace="6", srlimit="30")
-    return [r["title"].split(":", 1)[1] for r in d.get("query", {}).get("search", [])]
+def about_case(title):
+    """True if the Wikipedia article is about a sexual-abuse case (so a same-named person is never used)."""
+    d = api("en.wikipedia.org", action="query", prop="extracts", exintro=1, explaintext=1, titles=title, redirects=1)
+    pages = d.get("query", {}).get("pages", [])
+    text = pages[0].get("extract", "") if pages and not pages[0].get("missing") else ""
+    return bool(re.search(r"\b(rape|raping|sexual(ly)? (assault|abuse|abused|battery|misconduct)|sex offender|molest)", text, re.I))
 
 
 def names_person(filename, name):
@@ -100,16 +103,17 @@ def main():
                 continue
             except Exception as e:  # noqa: BLE001 - fall back to the Commons search
                 print(f"{name}: official photo download failed: {e}", file=sys.stderr)
+        # Only images from a Wikipedia article about this person's case. A Commons-wide name search matched
+        # other people with the same name (a musician, an athlete, a 19th-century soldier), so it is not used.
         candidates = []
         for title in [name] + EXTRA_TITLES.get(name, []):
             try:
-                candidates += [lead_image(title)] + article_images(title)
+                if about_case(title):
+                    candidates += [lead_image(title)] + article_images(title)
+                else:
+                    print(f"{name}: article {title!r} missing or not about the case; skipped", file=sys.stderr)
             except Exception as e:  # noqa: BLE001 - one failed lookup shouldn't stop the rest
                 print(f"{name}: article lookup failed for {title}: {e}", file=sys.stderr)
-        try:
-            candidates += commons_search(name)
-        except Exception as e:  # noqa: BLE001
-            print(f"{name}: Commons search failed: {e}", file=sys.stderr)
         found = None
         for f in dict.fromkeys(c for c in candidates if c and names_person(c, name)):
             try:
