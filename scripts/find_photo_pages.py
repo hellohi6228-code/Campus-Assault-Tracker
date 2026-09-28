@@ -10,6 +10,8 @@ import json
 import re
 import subprocess
 import sys
+import time
+import urllib.error
 import urllib.parse
 import urllib.request
 from html.parser import HTMLParser
@@ -45,14 +47,30 @@ class Images(HTMLParser):
             self.found.append(("", data.strip()))
 
 
+def fetch(url):
+    """Page HTML, retrying once after a pause when a site rate-limits us (HTTP 429)."""
+    for attempt in range(2):
+        try:
+            time.sleep(1.5)
+            with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=30) as r:
+                if "html" not in r.headers.get("Content-Type", "html"):
+                    return None
+                return r.read(3_000_000).decode("utf-8", "replace")
+        except urllib.error.HTTPError as e:
+            if e.code == 429 and attempt == 0:
+                time.sleep(20)
+                continue
+            print(f"  {url}: {e}", file=sys.stderr)
+            return None
+        except Exception as e:  # noqa: BLE001 - a dead or blocking page just doesn't count
+            print(f"  {url}: {e}", file=sys.stderr)
+            return None
+    return None
+
+
 def shows_person(url, name):
-    try:
-        with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=30) as r:
-            if "html" not in r.headers.get("Content-Type", "html"):
-                return None
-            page = r.read(3_000_000).decode("utf-8", "replace")
-    except Exception as e:  # noqa: BLE001 - a dead or blocking page just doesn't count
-        print(f"  {url}: {e}", file=sys.stderr)
+    page = fetch(url)
+    if page is None:
         return None
     parts = re.sub(r"\s+(Jr\.?|Sr\.?|I+V?)$", "", name).split()
     last, first = parts[-1].lower(), parts[0].lower()
