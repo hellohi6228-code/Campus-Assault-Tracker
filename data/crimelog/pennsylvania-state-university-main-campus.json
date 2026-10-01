@@ -1,5 +1,31 @@
 [
 {
+"id": "26UP04530",
+"reported": "10/01/2026 09:18 AM",
+"occurred": "09/25/2026 12:00 AM to 09/25/2026 11:59 AM",
+"nature": "Assisted an outside agency with a reported Sexual Assault at an off campus fraternity",
+"offenses": [
+"ASSIST OTHER LE AGENCY no UCR"
+],
+"location": "UNIVERSITY SUPPORT BLDG I",
+"disposition": "Closed",
+"first_seen": "2026-10-01",
+"last_seen": "2026-10-01"
+},
+{
+"id": "26UP04511",
+"reported": "09/30/2026 06:29 PM",
+"occurred": "09/24/2026 08:30 PM to 09/30/2026 10:06 PM",
+"nature": "Student reported suspicious activity",
+"offenses": [
+"SEX OFFENSES - (NOT CLERY)"
+],
+"location": "ON CAMPUS RESIDENCE HALL",
+"disposition": "Open",
+"first_seen": "2026-10-01",
+"last_seen": "2026-10-01"
+},
+{
 "id": "26UP04446",
 "reported": "09/27/2026 02:52 PM",
 "occurred": "09/25/2026 12:00 AM to 09/25/2026 09:00 AM",
