@@ -1,5 +1,18 @@
 [
 {
+"id": "26UP04919",
+"reported": "10/19/2026 08:32 AM",
+"occurred": "10/18/2026 06:00 PM to 10/18/2026 11:59 PM",
+"nature": "Assisted an outside agency with a reported Sexual Assault at an off campus fraternity",
+"offenses": [
+"RFA ASSIST OTHER AGENCY/DEPT"
+],
+"location": "UNKNOWN OFF CAMPUS FRATERNITY",
+"disposition": "Closed",
+"first_seen": "2026-10-20",
+"last_seen": "2026-10-20"
+},
+{
 "id": "26UP04870",
 "reported": "10/15/2026 08:32 PM",
 "occurred": "01/01/2024 12:00 AM to 10/15/2026 09:38 PM",
